@@ -27,16 +27,12 @@ export function ModeTabs() {
   }, [setMode])
 
   return (
-    <div className="no-drag flex items-center gap-1 rounded-lg bg-bg-base p-0.5">
+    <div className="mode-switch no-drag">
       {TABS.map(({ id, label, icon: Icon }) => (
         <button
           key={id}
           onClick={() => setMode(id)}
-          className={`flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-            mode === id
-              ? 'bg-accent text-white'
-              : 'text-text-secondary hover:bg-bg-hover hover:text-text-primary'
-          }`}
+          className={`mode-switch-tab ${mode === id ? 'is-active' : ''}`}
         >
           <Icon size={13} />
           {label}

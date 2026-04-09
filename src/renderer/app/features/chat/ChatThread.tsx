@@ -1,36 +1,24 @@
 import { useEffect, useRef } from 'react'
-import { useSessionStore } from '../../store/session'
-import type { ChatMessage } from '../../../../shared/types'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { Bot, User } from 'lucide-react'
+import { useSessionStore } from '../../store/session'
+import type { ChatMessage } from '../../../../shared/types'
 
 function MessageBubble({ msg }: { msg: ChatMessage }) {
   const isUser = msg.role === 'user'
 
   return (
-    <div className={`flex gap-3 ${isUser ? 'flex-row-reverse' : ''}`}>
-      <div
-        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${
-          isUser ? 'bg-bg-elevated' : 'bg-accent/10'
-        }`}
-      >
-        {isUser ? (
-          <User size={14} className="text-text-secondary" />
-        ) : (
-          <Bot size={14} className="text-accent" />
-        )}
+    <div className={`thread-message ${isUser ? 'is-user' : 'is-assistant'}`}>
+      <div className={`thread-avatar ${isUser ? 'is-user' : 'is-assistant'}`}>
+        {isUser ? <User size={14} /> : <Bot size={14} />}
       </div>
 
-      <div
-        className={`max-w-[75%] rounded-xl px-3 py-2 text-sm leading-relaxed ${
-          isUser ? 'bg-bg-elevated text-text-primary' : 'text-text-primary'
-        }`}
-      >
+      <div className={`thread-bubble ${isUser ? 'is-user' : 'is-assistant'}`}>
         {isUser ? (
           <p className="whitespace-pre-wrap">{msg.content}</p>
         ) : (
-          <div className="prose prose-invert prose-sm max-w-none">
+          <div className="md-content">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
           </div>
         )}
@@ -45,31 +33,40 @@ export function ChatThread() {
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+  }, [messages, isStreaming])
 
   if (messages.length === 0) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-3 text-text-muted">
-        <Bot size={32} className="text-border" />
-        <p className="text-sm">Ask anything — your conversation starts here</p>
+      <div className="thread-empty-state">
+        <div className="thread-empty-badge">
+          <Bot size={18} />
+          <span>Ask mode</span>
+        </div>
+        <h2>Start with a question, a repo task, or a decision to make.</h2>
+        <p>
+          Keep the main thread focused. Plans, tool calls, and approvals stay in dedicated surfaces
+          around the workspace.
+        </p>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col gap-4 p-4">
-      {messages.map((msg) => (
-        <MessageBubble key={msg.id} msg={msg} />
-      ))}
+    <div className="thread-shell">
+      <div className="thread-stack">
+        {messages.map((msg) => (
+          <MessageBubble key={msg.id} msg={msg} />
+        ))}
 
-      {isStreaming && (
-        <div className="flex items-center gap-2 px-10 text-xs text-text-muted">
-          <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-accent" />
-          Thinking…
-        </div>
-      )}
+        {isStreaming && (
+          <div className="thread-status">
+            <span className="thread-status-dot" />
+            Thinking...
+          </div>
+        )}
 
-      <div ref={bottomRef} />
+        <div ref={bottomRef} />
+      </div>
     </div>
   )
 }

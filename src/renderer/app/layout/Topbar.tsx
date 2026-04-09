@@ -9,45 +9,39 @@ export function Topbar() {
   const { toggleSidebar, toggleInspector, toggleBottomPanel } = useUIStore()
 
   return (
-    <header className="drag-region flex h-[44px] shrink-0 items-center gap-3 border-b border-border bg-bg-surface px-3">
-      <button
-        onClick={toggleSidebar}
-        className="no-drag rounded p-1 text-text-secondary hover:bg-bg-hover hover:text-text-primary"
-        title="Toggle sidebar"
-      >
+    <header className="drag-region topbar-shell">
+      <button onClick={toggleSidebar} className="topbar-icon-button no-drag" title="Toggle sidebar">
         <PanelLeft size={16} />
       </button>
 
-      <span className="no-drag text-sm font-semibold text-accent">GitHub Agent</span>
+      <div className="topbar-brand no-drag">
+        <span className="topbar-brand-dot" />
+        <div className="topbar-brand-copy">
+          <span className="topbar-brand-title">GitHub Agent</span>
+          <span className="topbar-brand-subtitle">Desktop workspace</span>
+        </div>
+      </div>
 
-      <div className="no-drag mx-2 h-4 w-px bg-border" />
+      <div className="topbar-cluster no-drag">
+        <RepoPicker />
+        <ModelPicker />
+      </div>
 
-      <RepoPicker />
-      <ModelPicker />
+      <div className="topbar-center">
+        <ModeTabs />
+      </div>
 
-      <div className="flex-1" />
+      <div className="topbar-actions no-drag">
+        <button onClick={toggleBottomPanel} className="topbar-icon-button" title="Toggle terminal">
+          <Terminal size={16} />
+        </button>
 
-      <ModeTabs />
+        <button onClick={toggleInspector} className="topbar-icon-button" title="Toggle inspector">
+          <PanelRight size={16} />
+        </button>
 
-      <div className="flex-1" />
-
-      <button
-        onClick={toggleBottomPanel}
-        className="no-drag rounded p-1 text-text-secondary hover:bg-bg-hover hover:text-text-primary"
-        title="Toggle terminal"
-      >
-        <Terminal size={16} />
-      </button>
-
-      <button
-        onClick={toggleInspector}
-        className="no-drag rounded p-1 text-text-secondary hover:bg-bg-hover hover:text-text-primary"
-        title="Toggle inspector"
-      >
-        <PanelRight size={16} />
-      </button>
-
-      <UserChip />
+        <UserChip />
+      </div>
     </header>
   )
 }

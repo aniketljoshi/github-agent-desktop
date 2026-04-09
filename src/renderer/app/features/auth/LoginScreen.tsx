@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { useAuthStore } from '../../store/auth'
 import { Github, KeyRound, Smartphone, Loader2, AlertCircle } from 'lucide-react'
+import { useAuthStore } from '../../store/auth'
 
 export function LoginScreen() {
   const { loginOAuth, loginDevice, loginPAT, isLoading, error } = useAuthStore()
@@ -15,8 +15,8 @@ export function LoginScreen() {
 
   useEffect(() => {
     const handler = (data: unknown) => {
-      const d = data as { code: string; uri: string }
-      setDeviceCode(d)
+      const payload = data as { code: string; uri: string }
+      setDeviceCode(payload)
     }
 
     window.api.on('auth:device-code', handler)
@@ -24,86 +24,146 @@ export function LoginScreen() {
   }, [])
 
   return (
-    <div className="flex h-full items-center justify-center bg-bg-base">
-      <div className="flex w-[380px] flex-col items-center gap-6 rounded-xl border border-border bg-bg-surface p-8">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-bg-elevated">
-          <Github size={24} className="text-accent" />
-        </div>
-
-        <div className="text-center">
-          <h1 className="text-lg font-semibold text-text-primary">GitHub Agent Desktop</h1>
-          <p className="mt-1 text-sm text-text-secondary">
-            Sign in to start using Ask, Plan, and Agent modes
-          </p>
-        </div>
-
-        {error && (
-          <div className="flex w-full items-start gap-2 rounded-lg bg-danger/10 p-3 text-xs text-danger">
-            <AlertCircle size={14} className="mt-0.5 shrink-0" />
-            {error}
+    <div className="auth-screen">
+      <div className="auth-frame">
+        <section className="auth-hero">
+          <div className="auth-hero-top">
+            <div className="auth-hero-mark">
+              <Github size={22} />
+            </div>
+            <div className="auth-mode-pills">
+              <span className="auth-mode-pill">Ask</span>
+              <span className="auth-mode-pill">Plan</span>
+              <span className="auth-mode-pill">Agent</span>
+            </div>
           </div>
-        )}
+          <span className="auth-kicker">GitHub-native coding workspace</span>
+          <h1 className="auth-title">Supervise agents from a calmer desktop surface.</h1>
+          <p className="auth-copy">
+            Ask questions, generate plans, and approve agent work from a focused workspace built
+            around reviewable changes instead of noisy chat chrome.
+          </p>
 
-        <div className="flex w-full flex-col gap-3">
-          <button
-            onClick={loginOAuth}
-            disabled={isLoading}
-            className="flex items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-50"
-          >
-            {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Github size={16} />}
-            Continue with GitHub
-          </button>
+          <div className="auth-preview">
+            <div className="auth-preview-header">
+              <span className="auth-feature-label">Session preview</span>
+              <span className="auth-preview-status">Approval-first</span>
+            </div>
+            <div className="auth-preview-command">
+              <span className="auth-preview-prompt">&gt;</span>
+              <span>Refactor auth flow and show me the exact diff before applying it.</span>
+            </div>
+            <div className="auth-preview-grid">
+              <div className="auth-preview-card">
+                <span className="auth-preview-card-label">Workspace</span>
+                <strong>Repo-aware execution</strong>
+                <p>Model routing, file context, terminal output, and checkpoints in one place.</p>
+              </div>
+              <div className="auth-preview-card">
+                <span className="auth-preview-card-label">Review</span>
+                <strong>Diffs before writes</strong>
+                <p>Every file edit and shell action stays inspectable before it lands.</p>
+              </div>
+              <div className="auth-preview-card auth-preview-card--timeline">
+                <span className="auth-preview-card-label">Live timeline</span>
+                <ul className="auth-preview-timeline">
+                  <li>Planned implementation steps</li>
+                  <li>Tool calls and command logs</li>
+                  <li>Approvals, retries, and final summary</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
 
-          <button
-            onClick={loginDevice}
-            disabled={isLoading}
-            className="flex items-center justify-center gap-2 rounded-lg border border-border bg-bg-elevated px-4 py-2 text-sm text-text-primary hover:bg-bg-hover disabled:opacity-50"
-          >
-            <Smartphone size={16} />
-            Use Device Code
-          </button>
-
-          {deviceCode && (
-            <div className="rounded-lg border border-accent/30 bg-accent/5 p-3 text-center">
-              <p className="text-xs text-text-secondary">
-                Open <span className="font-mono text-accent">{deviceCode.uri}</span>
+        <section className="auth-card">
+          <div className="auth-card-header">
+            <div className="auth-card-icon">
+              <Github size={20} />
+            </div>
+            <div>
+              <h2>Sign in to continue</h2>
+              <p>
+                Continue with GitHub opens your browser, completes sign-in, then returns you to the
+                app. Device Code and PAT are fallback options.
               </p>
-              <p className="mt-1 font-mono text-lg font-bold tracking-widest text-text-primary">
-                {deviceCode.code}
-              </p>
+            </div>
+          </div>
+
+          {error && (
+            <div className="auth-alert">
+              <AlertCircle size={14} className="shrink-0" />
+              <span>{error}</span>
             </div>
           )}
 
-          <button
-            onClick={() => setShowPAT(!showPAT)}
-            className="flex items-center justify-center gap-2 rounded-lg border border-border-subtle px-4 py-2 text-sm text-text-secondary hover:bg-bg-hover"
-          >
-            <KeyRound size={16} />
-            Use Personal Access Token
-          </button>
+          <div className="auth-actions">
+            <button
+              onClick={loginOAuth}
+              disabled={isLoading}
+              className="auth-action auth-action--primary"
+            >
+              {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Github size={16} />}
+              <span>Continue with GitHub</span>
+            </button>
 
-          {showPAT && (
-            <div className="flex flex-col gap-2">
-              <input
-                type="password"
-                value={patInput}
-                onChange={(e) => setPATInput(e.target.value)}
-                placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
-                className="w-full rounded-lg border border-border bg-bg-base px-3 py-2 font-mono text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handlePAT()
-                }}
-              />
-              <button
-                onClick={handlePAT}
-                disabled={isLoading || !patInput.trim()}
-                className="rounded-lg bg-bg-elevated px-4 py-2 text-sm text-text-primary hover:bg-bg-hover disabled:opacity-50"
-              >
-                {isLoading ? 'Validating…' : 'Authenticate'}
-              </button>
-            </div>
-          )}
-        </div>
+            <button onClick={loginDevice} disabled={isLoading} className="auth-action">
+              <Smartphone size={16} />
+              <span>Use Device Code</span>
+            </button>
+
+            {deviceCode && (
+              <div className="auth-device-code">
+                <div className="auth-device-meta">
+                  <span>Open</span>
+                  <span className="auth-device-uri">{deviceCode.uri}</span>
+                </div>
+                <div className="auth-device-token">{deviceCode.code}</div>
+              </div>
+            )}
+
+            <button
+              onClick={() => setShowPAT((value) => !value)}
+              className={`auth-action auth-action--subtle ${showPAT ? 'is-active' : ''}`}
+            >
+              <KeyRound size={16} />
+              <span>Use Personal Access Token</span>
+            </button>
+
+            {showPAT && (
+              <div className="auth-pat-block">
+                <label className="auth-field-label" htmlFor="pat-input">
+                  Fine-grained token
+                </label>
+                <input
+                  id="pat-input"
+                  type="password"
+                  value={patInput}
+                  onChange={(event) => setPATInput(event.target.value)}
+                  placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+                  className="auth-input"
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      void handlePAT()
+                    }
+                  }}
+                />
+                <button
+                  onClick={() => void handlePAT()}
+                  disabled={isLoading || !patInput.trim()}
+                  className="auth-action auth-action--secondary"
+                >
+                  {isLoading ? 'Validating...' : 'Authenticate'}
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="auth-footnote">
+            For local browser login, configure <code>GITHUB_CLIENT_ID</code>,{' '}
+            <code>GITHUB_CLIENT_SECRET</code>, and a matching <code>GITHUB_CALLBACK_URL</code>.
+          </div>
+        </section>
       </div>
     </div>
   )

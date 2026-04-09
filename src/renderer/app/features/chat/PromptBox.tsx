@@ -1,12 +1,12 @@
-import { useState, useRef, useEffect } from 'react'
-import { useSessionStore } from '../../store/session'
-import { useModelsStore } from '../../store/models'
+import { useEffect, useRef, useState } from 'react'
 import { Send, Square } from 'lucide-react'
+import { useModelsStore } from '../../store/models'
+import { useSessionStore } from '../../store/session'
 
 const PLACEHOLDERS: Record<string, string> = {
-  ask: 'Ask anything…',
-  plan: 'Describe your plan…',
-  agent: 'What should the agent do?'
+  ask: 'Ask about the repo, architecture, or implementation details...',
+  plan: 'Describe the outcome you want and get a structured execution plan...',
+  agent: 'Describe the task for the agent to execute under your supervision...'
 }
 
 export function PromptBox() {
@@ -27,7 +27,7 @@ export function PromptBox() {
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto'
-      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 160) + 'px'
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 160)}px`
     }
   }, [input])
 
@@ -57,49 +57,51 @@ export function PromptBox() {
     }
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-      e.preventDefault()
-      handleSend()
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+      event.preventDefault()
+      void handleSend()
     }
   }
 
   return (
-    <div className="shrink-0 border-t border-border bg-bg-surface p-3">
-      <div className="flex items-end gap-2 rounded-xl border border-border bg-bg-base px-3 py-2">
+    <div className="prompt-shell">
+      <div className="prompt-compose">
         <textarea
           ref={textareaRef}
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(event) => setInput(event.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={PLACEHOLDERS[mode]}
           rows={1}
-          className="flex-1 resize-none bg-transparent text-sm text-text-primary placeholder:text-text-muted focus:outline-none"
+          className="prompt-input"
           disabled={isStreaming}
         />
 
         {isStreaming ? (
           <button
             onClick={abortCurrent}
-            className="flex h-8 w-8 items-center justify-center rounded-lg bg-danger text-white hover:bg-danger-hover"
+            className="prompt-action prompt-action--danger"
             title="Stop"
           >
             <Square size={14} />
           </button>
         ) : (
           <button
-            onClick={handleSend}
+            onClick={() => void handleSend()}
             disabled={!input.trim() || !selectedModels[mode]}
-            className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-white hover:bg-accent-hover disabled:opacity-30"
+            className="prompt-action prompt-action--primary"
             title="Send (Ctrl+Enter)"
           >
             <Send size={14} />
           </button>
         )}
       </div>
-      <p className="mt-1 text-right text-[10px] text-text-muted">
-        Ctrl+Enter to send · Ctrl+1/2/3 switch mode
-      </p>
+
+      <div className="prompt-footnote">
+        <span>{mode === 'ask' ? 'Ask mode' : mode === 'plan' ? 'Plan mode' : 'Agent mode'}</span>
+        <span>Ctrl+Enter to send</span>
+      </div>
     </div>
   )
 }

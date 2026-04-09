@@ -12,9 +12,18 @@ export function createMainWindow(): BrowserWindow {
     minWidth: 900,
     minHeight: 600,
     show: false,
-    titleBarStyle: process.platform === 'darwin' ? 'hidden' : 'default',
+    autoHideMenuBar: true,
+    titleBarStyle: 'hidden',
+    titleBarOverlay:
+      process.platform === 'win32'
+        ? {
+            color: '#0f1116',
+            symbolColor: '#dfe7f7',
+            height: 56
+          }
+        : false,
     trafficLightPosition: { x: 12, y: 14 },
-    backgroundColor: '#1a1c2a',
+    backgroundColor: '#0d0f13',
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       contextIsolation: true,
@@ -24,6 +33,7 @@ export function createMainWindow(): BrowserWindow {
   })
 
   mainWindow.on('ready-to-show', () => mainWindow?.show())
+  mainWindow.setMenuBarVisibility(false)
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url)
@@ -41,4 +51,18 @@ export function createMainWindow(): BrowserWindow {
 
 export function getMainWindow(): BrowserWindow | null {
   return mainWindow
+}
+
+export function focusMainWindow(): void {
+  if (!mainWindow) return
+
+  if (mainWindow.isMinimized()) {
+    mainWindow.restore()
+  }
+
+  if (!mainWindow.isVisible()) {
+    mainWindow.show()
+  }
+
+  mainWindow.focus()
 }

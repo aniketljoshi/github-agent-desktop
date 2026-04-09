@@ -1,8 +1,8 @@
-import { useRef, useEffect } from 'react'
-import { useSessionStore } from '../../store/session'
-import { Bot, User, Wrench } from 'lucide-react'
+import { useEffect, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { Bot, User, Wrench } from 'lucide-react'
+import { useSessionStore } from '../../store/session'
 import type { ChatMessage, ToolInvocation } from '../../../../shared/types'
 
 type TimelineItem = { type: 'message'; msg: ChatMessage } | { type: 'tool'; tool: ToolInvocation }
@@ -17,64 +17,65 @@ export function AgentRunView() {
 
   if (!agentRun) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-3 text-text-muted">
-        <Bot size={32} className="text-border" />
-        <p className="text-sm">Tell the agent what to do — it will plan and execute</p>
+      <div className="agent-empty-state">
+        <div className="agent-empty-icon">
+          <Bot size={28} />
+        </div>
+        <div className="agent-empty-copy">
+          <h2>Delegate the task, then supervise the execution.</h2>
+          <p>
+            Agent mode is designed for review: tool calls, writes, commands, and approvals stay
+            visible while the run unfolds.
+          </p>
+        </div>
       </div>
     )
   }
 
-  // Build interleaved timeline
   const timeline: TimelineItem[] = []
-  let toolIdx = 0
+  let toolIndex = 0
 
-  for (const msg of agentRun.messages) {
-    timeline.push({ type: 'message', msg })
-    // Insert tools that started before the next message
+  for (const message of agentRun.messages) {
+    timeline.push({ type: 'message', msg: message })
+
     while (
-      toolIdx < agentRun.toolInvocations.length &&
-      agentRun.toolInvocations[toolIdx].startedAt <= msg.timestamp
+      toolIndex < agentRun.toolInvocations.length &&
+      agentRun.toolInvocations[toolIndex].startedAt <= message.timestamp
     ) {
-      timeline.push({ type: 'tool', tool: agentRun.toolInvocations[toolIdx] })
-      toolIdx++
+      timeline.push({ type: 'tool', tool: agentRun.toolInvocations[toolIndex] })
+      toolIndex += 1
     }
   }
-  // Remaining tools
-  while (toolIdx < agentRun.toolInvocations.length) {
-    timeline.push({ type: 'tool', tool: agentRun.toolInvocations[toolIdx] })
-    toolIdx++
+
+  while (toolIndex < agentRun.toolInvocations.length) {
+    timeline.push({ type: 'tool', tool: agentRun.toolInvocations[toolIndex] })
+    toolIndex += 1
   }
 
   return (
-    <div className="flex flex-col gap-3 p-4">
-      <div className="flex items-center gap-2 text-xs text-text-muted">
-        <span
-          className={`h-2 w-2 rounded-full ${agentRun.status === 'running' ? 'animate-pulse bg-accent' : agentRun.status === 'idle' ? 'bg-success' : 'bg-border'}`}
-        />
-        Session: {agentRun.sessionId.slice(0, 8)}… — {agentRun.status}
+    <div className="agent-shell">
+      <div className="agent-session-bar">
+        <span className={`agent-session-dot is-${agentRun.status}`} />
+        <span>Session {agentRun.sessionId.slice(0, 8)}...</span>
+        <span className="agent-session-status">{agentRun.status}</span>
       </div>
 
-      {timeline.map((item, i) => {
+      {timeline.map((item, index) => {
         if (item.type === 'message') {
           const isUser = item.msg.role === 'user'
           return (
-            <div key={`msg-${i}`} className={`flex gap-3 ${isUser ? 'flex-row-reverse' : ''}`}>
-              <div
-                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${isUser ? 'bg-bg-elevated' : 'bg-accent/10'}`}
-              >
-                {isUser ? (
-                  <User size={14} className="text-text-secondary" />
-                ) : (
-                  <Bot size={14} className="text-accent" />
-                )}
+            <div
+              key={`msg-${index}`}
+              className={`agent-message ${isUser ? 'is-user' : 'is-assistant'}`}
+            >
+              <div className={`agent-message-avatar ${isUser ? 'is-user' : 'is-assistant'}`}>
+                {isUser ? <User size={14} /> : <Bot size={14} />}
               </div>
-              <div
-                className={`max-w-[75%] rounded-xl px-3 py-2 text-sm ${isUser ? 'bg-bg-elevated' : ''}`}
-              >
+              <div className={`agent-message-bubble ${isUser ? 'is-user' : 'is-assistant'}`}>
                 {isUser ? (
-                  <p className="whitespace-pre-wrap text-text-primary">{item.msg.content}</p>
+                  <p className="whitespace-pre-wrap">{item.msg.content}</p>
                 ) : (
-                  <div className="prose prose-invert prose-sm max-w-none">
+                  <div className="md-content">
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>{item.msg.content}</ReactMarkdown>
                   </div>
                 )}
@@ -84,25 +85,18 @@ export function AgentRunView() {
         }
 
         return (
-          <div
-            key={`tool-${i}`}
-            className="ml-10 flex items-center gap-2 rounded-lg border border-border-subtle bg-bg-base px-3 py-2"
-          >
-            <Wrench size={12} className="text-text-muted" />
-            <span className="text-xs font-medium text-text-secondary">{item.tool.toolName}</span>
-            <span
-              className={`ml-auto text-[10px] ${item.tool.status === 'completed' ? 'text-success' : item.tool.status === 'denied' ? 'text-danger' : 'text-warning'}`}
-            >
-              {item.tool.status}
-            </span>
+          <div key={`tool-${index}`} className="agent-tool-row">
+            <Wrench size={12} className="agent-tool-icon" />
+            <span className="agent-tool-name">{item.tool.toolName}</span>
+            <span className={`agent-tool-status is-${item.tool.status}`}>{item.tool.status}</span>
           </div>
         )
       })}
 
       {isStreaming && (
-        <div className="flex items-center gap-2 px-10 text-xs text-text-muted">
-          <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-accent" />
-          Agent working…
+        <div className="agent-working-row">
+          <span className="thread-status-dot" />
+          Agent working...
         </div>
       )}
 

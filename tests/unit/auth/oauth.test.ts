@@ -4,7 +4,12 @@ vi.mock('electron', () => ({
   shell: { openExternal: vi.fn() }
 }))
 
-import { generatePKCE, generateState } from '../../../src/main/auth/github-oauth'
+import {
+  createOAuthAuthorizeUrl,
+  generatePKCE,
+  generateState,
+  startOAuthFlow
+} from '../../../src/main/auth/github-oauth'
 
 describe('OAuth PKCE helpers', () => {
   it('generates a code verifier of at least 43 characters', () => {
@@ -47,5 +52,30 @@ describe('OAuth state', () => {
     const a = generateState()
     const b = generateState()
     expect(a).not.toBe(b)
+  })
+})
+
+describe('OAuth authorize URL', () => {
+  it('includes client id, callback, state, and PKCE challenge', () => {
+    const url = createOAuthAuthorizeUrl({
+      clientId: 'client-123',
+      callbackUrl: 'http://127.0.0.1:48163/callback',
+      state: 'abc123',
+      codeChallenge: 'challenge123'
+    })
+
+    expect(url).toContain('client_id=client-123')
+    expect(url).toContain('redirect_uri=http%3A%2F%2F127.0.0.1%3A48163%2Fcallback')
+    expect(url).toContain('state=abc123')
+    expect(url).toContain('code_challenge=challenge123')
+    expect(url).toContain('code_challenge_method=S256')
+  })
+})
+
+describe('OAuth browser flow guards', () => {
+  it('requires a client secret for browser redirect login', async () => {
+    await expect(
+      startOAuthFlow('client-123', '', 'http://127.0.0.1:48163/callback')
+    ).rejects.toThrow(/GITHUB_CLIENT_SECRET/)
   })
 })

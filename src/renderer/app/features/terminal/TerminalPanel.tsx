@@ -14,16 +14,17 @@ export function TerminalPanel() {
 
   if (lines.length === 0) {
     return (
-      <p className="font-mono text-xs text-text-muted">
-        Terminal output from agent shell commands will appear here
-      </p>
+      <p className="terminal-empty">Terminal output from agent shell commands will appear here</p>
     )
   }
 
   return (
-    <pre className="font-mono text-xs leading-relaxed">
+    <pre className="terminal-output">
       {lines.map((line, i) => (
-        <span key={i} className={line.type === 'stderr' ? 'text-danger' : 'text-text-secondary'}>
+        <span
+          key={i}
+          className={line.type === 'stderr' ? 'terminal-line is-error' : 'terminal-line'}
+        >
           {line.data}
         </span>
       ))}
