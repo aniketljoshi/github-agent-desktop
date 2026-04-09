@@ -9,7 +9,7 @@ export async function loadSDK(): Promise<boolean> {
   if (sdkLoaded) return true
   try {
     const mod = await import('@github/copilot-sdk')
-    CopilotClientClass = mod.CopilotClient ?? mod.default?.CopilotClient
+    CopilotClientClass = mod.CopilotClient
     sdkLoaded = !!CopilotClientClass
     return sdkLoaded
   } catch {

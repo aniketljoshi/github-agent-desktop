@@ -1,6 +1,5 @@
 import { useSessionStore } from '../../store/session'
-import { useModelsStore } from '../../store/models'
-import { AlertTriangle, CheckCircle, FileCode, ArrowRight } from 'lucide-react'
+import { AlertTriangle, FileCode, ArrowRight } from 'lucide-react'
 import type { PlanStep as PlanStepType } from '../../../../shared/types'
 
 const RISK_STYLES: Record<string, string> = {

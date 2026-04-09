@@ -14,6 +14,7 @@ type ApiEvents = {
 type Api = ApiInvoke & ApiEvents
 
 const api = {} as Api
+const listeners = new Map<string, Map<(...args: unknown[]) => void, (...args: unknown[]) => void>>()
 
 // Build invoke methods for every channel
 for (const channel of INVOKE_CHANNELS) {
@@ -25,13 +26,25 @@ for (const channel of INVOKE_CHANNELS) {
 api.on = (channel: PushChannel, callback: (...args: unknown[]) => void) => {
   const allowed = new Set<string>(PUSH_CHANNELS)
   if (!allowed.has(channel)) return
-  ipcRenderer.on(channel, (_event, ...args) => callback(...args))
+  const wrapped = (_event: unknown, ...args: unknown[]) => callback(...args)
+  const byChannel = listeners.get(channel) ?? new Map()
+  byChannel.set(callback, wrapped)
+  listeners.set(channel, byChannel)
+  ipcRenderer.on(channel, wrapped)
 }
 
 api.off = (channel: PushChannel, callback: (...args: unknown[]) => void) => {
   const allowed = new Set<string>(PUSH_CHANNELS)
   if (!allowed.has(channel)) return
-  ipcRenderer.removeListener(channel, callback)
+  const byChannel = listeners.get(channel)
+  if (!byChannel) return
+  const wrapped = byChannel?.get(callback)
+  if (!wrapped) return
+  ipcRenderer.removeListener(channel, wrapped)
+  byChannel.delete(callback)
+  if (byChannel.size === 0) {
+    listeners.delete(channel)
+  }
 }
 
 contextBridge.exposeInMainWorld('api', api)

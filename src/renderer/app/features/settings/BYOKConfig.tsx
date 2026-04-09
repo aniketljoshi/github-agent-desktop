@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useSettingsStore } from '../../store/settings'
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react'
+import type { BYOKConfig as BYOKConfigType } from '../../../../shared/types'
 
 export function BYOKConfig() {
   const { settings, setBYOK, clearBYOK } = useSettingsStore()
-  const [provider, setProvider] = useState<'openai' | 'anthropic' | 'ollama'>('openai')
+  const [provider, setProvider] = useState<BYOKConfigType['provider']>('openai')
   const [apiKey, setApiKey] = useState('')
   const [baseUrl, setBaseUrl] = useState('https://api.openai.com/v1')
   const [saving, setSaving] = useState(false)
@@ -23,7 +24,6 @@ export function BYOKConfig() {
 
   const PROVIDER_URLS: Record<string, string> = {
     openai: 'https://api.openai.com/v1',
-    anthropic: 'https://api.anthropic.com',
     ollama: 'http://localhost:11434/v1'
   }
 
@@ -48,14 +48,13 @@ export function BYOKConfig() {
         <select
           value={provider}
           onChange={(e) => {
-            const p = e.target.value as 'openai' | 'anthropic' | 'ollama'
+            const p = e.target.value as BYOKConfigType['provider']
             setProvider(p)
             setBaseUrl(PROVIDER_URLS[p])
           }}
           className="rounded-lg border border-border bg-bg-base px-2 py-1.5 text-xs text-text-primary focus:border-accent focus:outline-none"
         >
           <option value="openai">OpenAI</option>
-          <option value="anthropic">Anthropic</option>
           <option value="ollama">Ollama (local)</option>
         </select>
 

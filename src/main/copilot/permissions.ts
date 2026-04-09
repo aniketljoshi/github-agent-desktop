@@ -1,21 +1,11 @@
-import { ipcMain } from 'electron'
 import { randomUUID } from 'crypto'
 import { getMainWindow } from '../windows'
 import { isWithinWorkspace } from '../workspace/path-guard'
 import { classifyRisk } from '../shell/risk-classifier'
-import { AGENT_PERMISSION_REQUEST, AGENT_PERMISSION_RESPONSE } from '../../shared/events'
+import { AGENT_PERMISSION_REQUEST } from '../../shared/events'
 import type { PermissionKind } from '../../shared/types'
 
 const pendingRequests = new Map<string, { resolve: (approved: boolean) => void }>()
-
-// Listen for permission responses from the renderer
-ipcMain.on(AGENT_PERMISSION_RESPONSE, (_event, args: { id: string; approved: boolean }) => {
-  const pending = pendingRequests.get(args.id)
-  if (pending) {
-    pending.resolve(args.approved)
-    pendingRequests.delete(args.id)
-  }
-})
 
 async function askRenderer(request: {
   id: string
@@ -66,6 +56,9 @@ export async function handlePermissionRequest(
     }
 
     case 'write': {
+      if (fileName && !isWithinWorkspace(workspaceRoot, fileName)) {
+        return { kind: 'denied-interactively-by-user' }
+      }
       const approved = await askRenderer({ id, kind, toolName, fileName, diff })
       return approved
         ? { kind: 'approved' }
@@ -80,10 +73,6 @@ export async function handlePermissionRequest(
         ? { kind: 'approved' }
         : { kind: 'denied-interactively-by-user' }
     }
-
-    case 'url':
-      return { kind: 'approved' }
-
     default:
       return { kind: 'denied-interactively-by-user' }
   }

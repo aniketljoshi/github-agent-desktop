@@ -16,5 +16,20 @@ export async function validatePAT(
   }
 
   const data = (await res.json()) as { login: string; avatar_url: string }
+
+  const modelsRes = await fetch('https://models.github.ai/catalog/models', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/json',
+      'X-GitHub-Api-Version': '2025-01-01'
+    }
+  })
+
+  if (!modelsRes.ok) {
+    throw new Error(
+      `Token does not have GitHub Models access (${modelsRes.status}: ${modelsRes.statusText})`
+    )
+  }
+
   return { username: data.login, avatarUrl: data.avatar_url }
 }

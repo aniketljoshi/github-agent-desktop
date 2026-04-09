@@ -7,6 +7,7 @@
   "author": "Aniket Joshi",
   "license": "MIT",
   "homepage": "https://github.com/AniketJoshi/github-agent-desktop",
+  "packageManager": "pnpm@9.15.9",
   "repository": {
     "type": "git",
     "url": "https://github.com/AniketJoshi/github-agent-desktop.git"
@@ -88,22 +89,15 @@
     "directories": {
       "buildResources": "build"
     },
-    "files": [
-      "out/**/*",
-      "!node_modules/**/*"
-    ],
     "win": {
-      "target": ["nsis", "portable"],
-      "icon": "build/icon.ico"
+      "target": ["nsis", "portable"]
     },
     "mac": {
       "target": ["dmg"],
-      "icon": "build/icon.icns",
       "category": "public.app-category.developer-tools"
     },
     "linux": {
       "target": ["AppImage", "deb"],
-      "icon": "build/icon.png",
       "category": "Development"
     },
     "nsis": {

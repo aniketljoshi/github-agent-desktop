@@ -39,9 +39,19 @@ export const useAuthStore = create<AuthState>((set) => ({
   loginOAuth: async () => {
     set({ isLoading: true, error: null })
     try {
-      const res = (await window.api['auth:login-oauth']()) as { success: boolean; error?: string; user?: { username: string; avatarUrl: string } }
+      const res = (await window.api['auth:login-oauth']()) as {
+        success: boolean
+        error?: string
+        authMethod?: AuthMethod
+        user?: { username: string; avatarUrl: string }
+      }
       if (!res.success) throw new Error(res.error ?? 'OAuth login failed')
-      set({ isAuthenticated: true, user: res.user ?? null, authMethod: 'oauth', isLoading: false })
+      set({
+        isAuthenticated: true,
+        user: res.user ?? null,
+        authMethod: res.authMethod ?? 'device-flow',
+        isLoading: false
+      })
     } catch (err) {
       set({ isLoading: false, error: err instanceof Error ? err.message : 'Login failed' })
     }
@@ -50,9 +60,19 @@ export const useAuthStore = create<AuthState>((set) => ({
   loginDevice: async () => {
     set({ isLoading: true, error: null })
     try {
-      const res = (await window.api['auth:login-device']()) as { success: boolean; error?: string; user?: { username: string; avatarUrl: string } }
+      const res = (await window.api['auth:login-device']()) as {
+        success: boolean
+        error?: string
+        authMethod?: AuthMethod
+        user?: { username: string; avatarUrl: string }
+      }
       if (!res.success) throw new Error(res.error ?? 'Device flow failed')
-      set({ isAuthenticated: true, user: res.user ?? null, authMethod: 'device-flow', isLoading: false })
+      set({
+        isAuthenticated: true,
+        user: res.user ?? null,
+        authMethod: res.authMethod ?? 'device-flow',
+        isLoading: false
+      })
     } catch (err) {
       set({ isLoading: false, error: err instanceof Error ? err.message : 'Login failed' })
     }
@@ -61,9 +81,19 @@ export const useAuthStore = create<AuthState>((set) => ({
   loginPAT: async (token: string) => {
     set({ isLoading: true, error: null })
     try {
-      const res = (await window.api['auth:login-pat']({ token })) as { success: boolean; error?: string; user?: { username: string; avatarUrl: string } }
+      const res = (await window.api['auth:login-pat']({ token })) as {
+        success: boolean
+        error?: string
+        authMethod?: AuthMethod
+        user?: { username: string; avatarUrl: string }
+      }
       if (!res.success) throw new Error(res.error ?? 'PAT validation failed')
-      set({ isAuthenticated: true, user: res.user ?? null, authMethod: 'pat', isLoading: false })
+      set({
+        isAuthenticated: true,
+        user: res.user ?? null,
+        authMethod: res.authMethod ?? 'pat',
+        isLoading: false
+      })
     } catch (err) {
       set({ isLoading: false, error: err instanceof Error ? err.message : 'Login failed' })
     }

@@ -1,12 +1,12 @@
 import { create } from 'zustand'
 import type {
-  Mode,
-  ChatMessage,
-  PlanDocument,
   AgentRun,
   AgentSessionSummary,
-  ToolInvocation,
-  PermissionRequest
+  ChatMessage,
+  Mode,
+  PermissionRequest,
+  PlanDocument,
+  ToolInvocation
 } from '../../../shared/types'
 
 interface SessionState {
@@ -28,12 +28,12 @@ interface SessionState {
   resumeSession: (id: string) => Promise<void>
   deleteSession: (id: string) => Promise<void>
   addStreamDelta: (content: string) => void
+  addAgentStreamDelta: (content: string) => void
+  setAgentMessage: (content: string) => void
   completeStream: () => void
   respondToPermission: (id: string, approved: boolean) => void
   clearMessages: () => void
 }
-
-let streamBuffer = ''
 
 export const useSessionStore = create<SessionState>((set, get) => ({
   mode: 'ask',
@@ -55,12 +55,11 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     }
     const prev = get().messages
     set({ messages: [...prev, userMsg], isStreaming: true })
-    streamBuffer = ''
 
     try {
       const history = [...prev, userMsg].map((m) => ({ role: m.role, content: m.content }))
       await window.api['ask:send']({ messages: history, model })
-    } catch (err) {
+    } catch {
       set({ isStreaming: false })
     }
   },
@@ -83,7 +82,9 @@ export const useSessionStore = create<SessionState>((set, get) => ({
         agentRun: {
           sessionId: res.sessionId,
           status: 'running',
-          messages: [{ id: crypto.randomUUID(), role: 'user', content: prompt, timestamp: Date.now() }],
+          messages: [
+            { id: crypto.randomUUID(), role: 'user', content: prompt, timestamp: Date.now() }
+          ],
           toolInvocations: [],
           startedAt: Date.now()
         }
@@ -96,7 +97,12 @@ export const useSessionStore = create<SessionState>((set, get) => ({
   sendAgentMessage: async (prompt) => {
     const run = get().agentRun
     if (!run) return
-    const newMsg: ChatMessage = { id: crypto.randomUUID(), role: 'user', content: prompt, timestamp: Date.now() }
+    const newMsg: ChatMessage = {
+      id: crypto.randomUUID(),
+      role: 'user',
+      content: prompt,
+      timestamp: Date.now()
+    }
     set({ agentRun: { ...run, messages: [...run.messages, newMsg] }, isStreaming: true })
     await window.api['agent:send']({ sessionId: run.sessionId, prompt })
   },
@@ -134,40 +140,80 @@ export const useSessionStore = create<SessionState>((set, get) => ({
   },
 
   addStreamDelta: (content) => {
-    streamBuffer += content
     const msgs = get().messages
     const last = msgs[msgs.length - 1]
     if (last?.role === 'assistant') {
+      set({ messages: [...msgs.slice(0, -1), { ...last, content: last.content + content }] })
+      return
+    }
+
+    set({
+      messages: [...msgs, { id: crypto.randomUUID(), role: 'assistant', content, timestamp: Date.now() }]
+    })
+  },
+
+  addAgentStreamDelta: (content) => {
+    const run = get().agentRun
+    if (!run) return
+
+    const last = run.messages[run.messages.length - 1]
+    if (last?.role === 'assistant') {
       set({
-        messages: [
-          ...msgs.slice(0, -1),
-          { ...last, content: last.content + content }
-        ]
+        agentRun: {
+          ...run,
+          messages: [...run.messages.slice(0, -1), { ...last, content: last.content + content }]
+        }
       })
-    } else {
-      set({
+      return
+    }
+
+    set({
+      agentRun: {
+        ...run,
         messages: [
-          ...msgs,
+          ...run.messages,
           { id: crypto.randomUUID(), role: 'assistant', content, timestamp: Date.now() }
         ]
-      })
-    }
+      }
+    })
   },
 
-  completeStream: () => {
-    streamBuffer = ''
-    set({ isStreaming: false })
+  setAgentMessage: (content) => {
+    const run = get().agentRun
+    if (!run) return
+
+    const last = run.messages[run.messages.length - 1]
+    if (last?.role === 'assistant') {
+      set({
+        agentRun: {
+          ...run,
+          messages: [...run.messages.slice(0, -1), { ...last, content }]
+        }
+      })
+      return
+    }
+
+    set({
+      agentRun: {
+        ...run,
+        messages: [
+          ...run.messages,
+          { id: crypto.randomUUID(), role: 'assistant', content, timestamp: Date.now() }
+        ]
+      }
+    })
   },
+
+  completeStream: () => set({ isStreaming: false }),
 
   respondToPermission: (id, approved) => {
-    window.api['agent:permission-response']({ id, approved })
+    void window.api['agent:permission-response']({ id, approved })
     set({ pendingPermission: null })
   },
 
   clearMessages: () => set({ messages: [] })
 }))
 
-// Subscribe to IPC push events
 if (typeof window !== 'undefined' && window.api) {
   window.api.on('chat:stream-delta', (data: unknown) => {
     const d = data as { content: string }
@@ -186,6 +232,11 @@ if (typeof window !== 'undefined' && window.api) {
     const event = data as { type: string; [key: string]: unknown }
     const state = useSessionStore.getState()
 
+    if (event.type === 'message-delta') {
+      state.addAgentStreamDelta(String(event.content ?? ''))
+      return
+    }
+
     if (event.type === 'tool-start' && state.agentRun) {
       const tool: ToolInvocation = {
         id: crypto.randomUUID(),
@@ -199,30 +250,29 @@ if (typeof window !== 'undefined' && window.api) {
           toolInvocations: [...state.agentRun.toolInvocations, tool]
         }
       })
+      return
     }
 
     if (event.type === 'tool-complete' && state.agentRun) {
       const tools = state.agentRun.toolInvocations.map((t) =>
-        t.status === 'running'
-          ? { ...t, status: 'completed' as const, completedAt: Date.now() }
-          : t
+        t.status === 'running' ? { ...t, status: 'completed' as const, completedAt: Date.now() } : t
       )
       useSessionStore.setState({
         agentRun: { ...state.agentRun, toolInvocations: tools }
       })
+      return
     }
 
-    if (event.type === 'idle') {
-      if (state.agentRun) {
-        useSessionStore.setState({
-          agentRun: { ...state.agentRun, status: 'idle' },
-          isStreaming: false
-        })
-      }
+    if (event.type === 'idle' && state.agentRun) {
+      useSessionStore.setState({
+        agentRun: { ...state.agentRun, status: 'idle' },
+        isStreaming: false
+      })
+      return
     }
 
     if (event.type === 'message') {
-      state.addStreamDelta(String(event.content ?? ''))
+      state.setAgentMessage(String(event.content ?? ''))
     }
   })
 }

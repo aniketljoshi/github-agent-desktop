@@ -1,5 +1,10 @@
 /// <reference types="vite/client" />
+import type { PreloadApi } from './app/preload-api'
 
-interface Window {
-  api: import('./app/preload-api').PreloadApi
+declare global {
+  interface Window {
+    api: PreloadApi
+  }
 }
+
+export {}

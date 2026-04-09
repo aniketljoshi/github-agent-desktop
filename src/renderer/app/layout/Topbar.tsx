@@ -1,7 +1,3 @@
-import { useAuthStore } from '../store/auth'
-import { useModelsStore } from '../store/models'
-import { useSessionStore } from '../store/session'
-import { useWorkspaceStore } from '../store/workspace'
 import { useUIStore } from '../store/ui'
 import { UserChip } from '../features/auth/UserChip'
 import { ModelPicker } from '../features/models/ModelPicker'

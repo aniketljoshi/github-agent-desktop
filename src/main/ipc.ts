@@ -1,6 +1,7 @@
 import { ipcMain } from 'electron'
 import type { ZodSchema } from 'zod'
 import { ipcSchemas } from '../shared/ipc-schemas'
+import type { BYOKConfig, Mode, PermissionResponse, UserSettings } from '../shared/types'
 import {
   AUTH_LOGIN_OAUTH,
   AUTH_LOGIN_DEVICE,
@@ -31,18 +32,23 @@ import {
 } from '../shared/events'
 import * as authService from './auth/github-oauth'
 import { validatePAT } from './auth/pat-auth'
-import { storeToken, deleteToken, getToken } from './auth/token-store'
+import {
+  deleteToken,
+  getAuthMethod,
+  getToken,
+  storeAuthMethod,
+  storeToken
+} from './auth/token-store'
 import { fetchModelCatalog } from './github/models'
 import * as askService from './services/ask-service'
 import * as planService from './services/plan-service'
 import * as agentService from './services/agent-service'
-import * as providerRegistry from './services/provider-registry'
 import * as workspace from './workspace/workspace'
 import { settingsStore } from './services/settings-store'
 
 const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID ?? ''
 
-function validated<T>(schema: ZodSchema, handler: (args: T) => Promise<unknown>) {
+function validated<T>(schema: ZodSchema, handler: (args: T) => unknown | Promise<unknown>) {
   return async (_event: Electron.IpcMainInvokeEvent, rawArgs: unknown) => {
     try {
       const args = schema.parse(rawArgs ?? {}) as T
@@ -59,10 +65,14 @@ export function registerAllHandlers(): void {
   ipcMain.handle(
     AUTH_LOGIN_OAUTH,
     validated(ipcSchemas['auth:login-oauth'], async () => {
-      const token = await authService.startOAuthFlow(GITHUB_CLIENT_ID)
+      const { getMainWindow } = await import('./windows')
+      const token = await authService.startOAuthFlow(GITHUB_CLIENT_ID, (code, uri) => {
+        getMainWindow()?.webContents.send('auth:device-code', { code, uri })
+      })
       const user = await validatePAT(token)
       storeToken('github', token)
-      return { success: true, user }
+      storeAuthMethod('github', 'device-flow')
+      return { success: true, user, authMethod: 'device-flow' as const }
     })
   )
 
@@ -75,7 +85,8 @@ export function registerAllHandlers(): void {
       })
       const user = await validatePAT(token)
       storeToken('github', token)
-      return { success: true, user }
+      storeAuthMethod('github', 'device-flow')
+      return { success: true, user, authMethod: 'device-flow' as const }
     })
   )
 
@@ -84,7 +95,8 @@ export function registerAllHandlers(): void {
     validated(ipcSchemas['auth:login-pat'], async (args: { token: string }) => {
       const user = await validatePAT(args.token)
       storeToken('github', args.token)
-      return { success: true, user }
+      storeAuthMethod('github', 'pat')
+      return { success: true, user, authMethod: 'pat' as const }
     })
   )
 
@@ -102,7 +114,11 @@ export function registerAllHandlers(): void {
       if (!token) return { isAuthenticated: false, user: null, authMethod: null }
       try {
         const user = await validatePAT(token)
-        return { isAuthenticated: true, user, authMethod: 'oauth' as const }
+        return {
+          isAuthenticated: true,
+          user,
+          authMethod: getAuthMethod('github')
+        }
       } catch {
         deleteToken('github')
         return { isAuthenticated: false, user: null, authMethod: null }
@@ -122,12 +138,11 @@ export function registerAllHandlers(): void {
 
   ipcMain.handle(
     MODELS_SELECT,
-    validated(ipcSchemas['models:select'], async (args: { mode: string; modelId: string }) => {
+    validated(ipcSchemas['models:select'], async (args: { mode: Mode; modelId: string }) => {
       const s = settingsStore.get()
-      const mode = args.mode as 'ask' | 'plan' | 'agent'
       settingsStore.set({
         ...s,
-        selectedModel: { ...s.selectedModel, [mode]: args.modelId }
+        selectedModel: { ...s.selectedModel, [args.mode]: args.modelId }
       })
     })
   )
@@ -175,13 +190,18 @@ export function registerAllHandlers(): void {
   // ── Agent ─────────────────────────────────────────────
   ipcMain.handle(
     AGENT_START,
-    validated(ipcSchemas['agent:start'], (args) => agentService.startAgent(args as never))
+    validated(ipcSchemas['agent:start'], (args) =>
+      agentService.startAgent(args as { model: string; prompt: string; systemMessage?: string })
+    )
   )
 
   ipcMain.handle(
     AGENT_SEND,
     validated(ipcSchemas['agent:send'], (args) =>
-      agentService.sendAgentMessage((args as { sessionId: string; prompt: string }).sessionId, (args as { sessionId: string; prompt: string }).prompt)
+      agentService.sendAgentMessage(
+        (args as { sessionId: string; prompt: string }).sessionId,
+        (args as { sessionId: string; prompt: string }).prompt
+      )
     )
   )
 
@@ -212,7 +232,7 @@ export function registerAllHandlers(): void {
   ipcMain.handle(
     AGENT_PERMISSION_RESPONSE,
     validated(ipcSchemas['agent:permission-response'], (args) =>
-      agentService.handlePermissionResponse(args as { id: string; approved: boolean })
+      agentService.handlePermissionResponse(args as PermissionResponse)
     )
   )
 
@@ -251,7 +271,7 @@ export function registerAllHandlers(): void {
 
   ipcMain.handle(
     SETTINGS_SET,
-    validated(ipcSchemas['settings:set'], async (args) => {
+    validated(ipcSchemas['settings:set'], async (args: Partial<UserSettings>) => {
       const current = settingsStore.get()
       settingsStore.set({ ...current, ...args })
     })
@@ -259,13 +279,15 @@ export function registerAllHandlers(): void {
 
   ipcMain.handle(
     SETTINGS_SET_BYOK,
-    validated(ipcSchemas['settings:set-byok'], async (args) => {
-      const { apiKey, ...rest } = args as { provider: string; apiKey: string; baseUrl: string }
+    validated(
+      ipcSchemas['settings:set-byok'],
+      async (args: BYOKConfig & { apiKey: string }) => {
+        const { apiKey, ...rest } = args
       storeToken('byok', apiKey)
       const current = settingsStore.get()
-      settingsStore.set({ ...current, hasBYOK: true })
-      void rest // provider + baseUrl stored in settings file in future
-    })
+      settingsStore.set({ ...current, hasBYOK: true, byokConfig: rest })
+      }
+    )
   )
 
   ipcMain.handle(
@@ -273,7 +295,7 @@ export function registerAllHandlers(): void {
     validated(ipcSchemas['settings:clear-byok'], async () => {
       deleteToken('byok')
       const current = settingsStore.get()
-      settingsStore.set({ ...current, hasBYOK: false })
+      settingsStore.set({ ...current, hasBYOK: false, byokConfig: null })
     })
   )
 }

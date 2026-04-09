@@ -1,12 +1,12 @@
 import { create } from 'zustand'
-import type { UserSettings } from '../../../shared/types'
+import type { BYOKConfig, UserSettings } from '../../../shared/types'
 
 interface SettingsState {
   settings: UserSettings | null
   isLoading: boolean
   loadSettings: () => Promise<void>
   updateSettings: (partial: Partial<UserSettings>) => Promise<void>
-  setBYOK: (config: { provider: string; apiKey: string; baseUrl: string }) => Promise<void>
+  setBYOK: (config: BYOKConfig & { apiKey: string }) => Promise<void>
   clearBYOK: () => Promise<void>
 }
 
@@ -36,7 +36,9 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     await window.api['settings:set-byok'](config)
     const current = get().settings
     if (current) {
-      set({ settings: { ...current, hasBYOK: true } })
+      const { apiKey, ...byokConfig } = config
+      void apiKey
+      set({ settings: { ...current, hasBYOK: true, byokConfig } })
     }
   },
 
@@ -44,7 +46,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     await window.api['settings:clear-byok']()
     const current = get().settings
     if (current) {
-      set({ settings: { ...current, hasBYOK: false } })
+      set({ settings: { ...current, hasBYOK: false, byokConfig: null } })
     }
   }
 }))

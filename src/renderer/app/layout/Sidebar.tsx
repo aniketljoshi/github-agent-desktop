@@ -1,9 +1,9 @@
 import { useEffect } from 'react'
 import { useSessionStore } from '../store/session'
-import { MessageSquare, FileText, FolderOpen, Trash2 } from 'lucide-react'
+import { MessageSquare, FolderOpen, Trash2 } from 'lucide-react'
 
 export function Sidebar() {
-  const { agentSessions, loadAgentSessions, resumeSession, deleteSession, mode } = useSessionStore()
+  const { agentSessions, loadAgentSessions, resumeSession, deleteSession } = useSessionStore()
 
   useEffect(() => {
     loadAgentSessions()

@@ -67,7 +67,7 @@ describe('IPC schema validation', () => {
   })
 
   it('all schemas in ipcSchemas are Zod schemas', () => {
-    for (const [key, schema] of Object.entries(ipcSchemas)) {
+    for (const schema of Object.values(ipcSchemas)) {
       expect(schema).toHaveProperty('parse')
       expect(schema).toHaveProperty('safeParse')
     }

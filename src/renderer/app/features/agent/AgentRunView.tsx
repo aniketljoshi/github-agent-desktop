@@ -1,6 +1,5 @@
 import { useRef, useEffect } from 'react'
 import { useSessionStore } from '../../store/session'
-import { ToolRunList } from './ToolRunList'
 import { Bot, User, Wrench } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'

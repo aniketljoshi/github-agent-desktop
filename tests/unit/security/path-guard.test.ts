@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { assertWithinWorkspace, isWithinWorkspace, PathTraversalError } from '../../../src/main/workspace/path-guard'
-import { resolve, sep } from 'path'
+import { resolve } from 'path'
 
 const ROOT = resolve('/workspace/project')
 

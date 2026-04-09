@@ -89,13 +89,19 @@ export function ModelPicker() {
                     <span className="flex-1 truncate text-left">{m.name}</span>
                     <div className="flex gap-1">
                       {m.capabilities.includes('streaming') && (
-                        <Zap size={10} className="text-text-muted" title="Streaming" />
+                        <span title="Streaming">
+                          <Zap size={10} className="text-text-muted" />
+                        </span>
                       )}
                       {m.capabilities.includes('tool-calling') && (
-                        <Wrench size={10} className="text-text-muted" title="Tool calling" />
+                        <span title="Tool calling">
+                          <Wrench size={10} className="text-text-muted" />
+                        </span>
                       )}
                       {m.supportedInputModalities.includes('image') && (
-                        <Eye size={10} className="text-text-muted" title="Vision" />
+                        <span title="Vision">
+                          <Eye size={10} className="text-text-muted" />
+                        </span>
                       )}
                     </div>
                   </button>

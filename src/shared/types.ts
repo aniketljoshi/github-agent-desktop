@@ -1,5 +1,3 @@
-// ─── Auth ───────────────────────────────────────────────────
-
 export interface AuthSession {
   username: string
   avatarUrl: string
@@ -9,24 +7,18 @@ export interface AuthSession {
 
 export type AuthMethod = 'oauth' | 'device-flow' | 'pat'
 
-/** Surfaces exposed to the renderer — never includes the raw token. */
 export interface AuthStatus {
   isAuthenticated: boolean
   user: { username: string; avatarUrl: string } | null
   authMethod: AuthMethod | null
 }
 
-// ─── Providers ──────────────────────────────────────────────
-
 export type ProviderKind = 'github-models' | 'copilot-sdk' | 'byok'
 
 export interface BYOKConfig {
-  provider: 'openai' | 'anthropic' | 'ollama'
+  provider: 'openai' | 'ollama'
   baseUrl: string
-  // apiKey is stored encrypted — never present in renderer memory
 }
-
-// ─── Models ─────────────────────────────────────────────────
 
 export interface ModelCatalogEntry {
   id: string
@@ -39,19 +31,13 @@ export interface ModelCatalogEntry {
   tags: string[]
 }
 
-// ─── Modes ──────────────────────────────────────────────────
-
 export type Mode = 'ask' | 'plan' | 'agent'
-
-// ─── Workspace ──────────────────────────────────────────────
 
 export interface WorkspaceContext {
   rootPath: string
   repoName: string
   branch: string
 }
-
-// ─── Chat ───────────────────────────────────────────────────
 
 export interface ChatMessage {
   id: string
@@ -60,8 +46,6 @@ export interface ChatMessage {
   timestamp: number
   model?: string
 }
-
-// ─── Plan ───────────────────────────────────────────────────
 
 export interface PlanDocument {
   id: string
@@ -80,8 +64,6 @@ export interface PlanStep {
   status: 'pending' | 'in-progress' | 'done' | 'skipped'
 }
 
-// ─── Agent ──────────────────────────────────────────────────
-
 export interface AgentRun {
   sessionId: string
   status: AgentStatus
@@ -91,12 +73,7 @@ export interface AgentRun {
   completedAt?: number
 }
 
-export type AgentStatus =
-  | 'idle'
-  | 'running'
-  | 'awaiting-approval'
-  | 'completed'
-  | 'error'
+export type AgentStatus = 'idle' | 'running' | 'awaiting-approval' | 'completed' | 'error'
 
 export interface ToolInvocation {
   id: string
@@ -107,8 +84,6 @@ export interface ToolInvocation {
   startedAt: number
   completedAt?: number
 }
-
-// ─── Permissions ────────────────────────────────────────────
 
 export type PermissionKind =
   | 'read'
@@ -135,8 +110,6 @@ export interface PermissionResponse {
   approved: boolean
 }
 
-// ─── Terminal ───────────────────────────────────────────────
-
 export interface TerminalRunResult {
   command: string
   exitCode: number
@@ -147,17 +120,14 @@ export interface TerminalRunResult {
 
 export type ShellRisk = 'safe' | 'review' | 'dangerous'
 
-// ─── Settings ───────────────────────────────────────────────
-
 export interface UserSettings {
   selectedProvider: Record<Mode, ProviderKind>
   selectedModel: Record<Mode, string>
   repoPath: string | null
   hasBYOK: boolean
+  byokConfig: BYOKConfig | null
   theme: 'dark'
 }
-
-// ─── Session listing (Copilot SDK) ──────────────────────────
 
 export interface AgentSessionSummary {
   sessionId: string
@@ -167,15 +137,11 @@ export interface AgentSessionSummary {
   context?: string
 }
 
-// ─── Quota ──────────────────────────────────────────────────
-
 export interface QuotaInfo {
   remaining: number
   limit: number
   resetAt: number
 }
-
-// ─── Stream delta ───────────────────────────────────────────
 
 export interface StreamDelta {
   sessionId: string

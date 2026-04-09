@@ -14,6 +14,10 @@ describe('validatePAT', () => {
       ok: true,
       json: async () => ({ login: 'testuser', avatar_url: 'https://avatar.test/u.png' })
     })
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => []
+    })
 
     const { validatePAT } = await import('../../../src/main/auth/pat-auth')
     const result = await validatePAT('ghp_validtoken')
@@ -36,6 +40,21 @@ describe('validatePAT', () => {
 
     const { validatePAT } = await import('../../../src/main/auth/pat-auth')
     await expect(validatePAT('ghp_token')).rejects.toThrow('Network failure')
+  })
+
+  it('throws when the token lacks GitHub Models access', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ login: 'testuser', avatar_url: 'https://avatar.test/u.png' })
+    })
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 403,
+      statusText: 'Forbidden'
+    })
+
+    const { validatePAT } = await import('../../../src/main/auth/pat-auth')
+    await expect(validatePAT('ghp_missing_models')).rejects.toThrow('GitHub Models access')
   })
 
   it('throws for empty token', async () => {

@@ -22,6 +22,7 @@ describe('provider-registry', () => {
       selectedModel: { ask: '', plan: '', agent: '' },
       repoPath: null,
       hasBYOK: false,
+      byokConfig: null,
       theme: 'dark' as const
     }
     expect(getProviderForMode('ask', settings)).toBe('github-models')
@@ -36,6 +37,7 @@ describe('provider-registry', () => {
       selectedModel: { ask: '', plan: '', agent: '' },
       repoPath: null,
       hasBYOK: true,
+      byokConfig: { provider: 'openai' as const, baseUrl: 'https://api.openai.com/v1' },
       theme: 'dark' as const
     }
     expect(getProviderForMode('plan', settings)).toBe('byok')

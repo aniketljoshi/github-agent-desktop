@@ -13,6 +13,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   },
   repoPath: null,
   hasBYOK: false,
+  byokConfig: null,
   theme: 'dark'
 }
 

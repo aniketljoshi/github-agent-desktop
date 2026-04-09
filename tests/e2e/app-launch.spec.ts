@@ -32,7 +32,7 @@ test('login screen is visible when unauthenticated', async () => {
 
 test('three auth options are visible', async () => {
   const window = await app.firstWindow()
-  await expect(window.locator('text=Login with GitHub')).toBeVisible()
+  await expect(window.locator('text=Continue with GitHub')).toBeVisible()
   await expect(window.locator('text=Use Device Code')).toBeVisible()
   await expect(window.locator('text=Use Personal Access Token')).toBeVisible()
 })

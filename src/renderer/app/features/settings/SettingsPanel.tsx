@@ -1,16 +1,9 @@
 import { useUIStore } from '../../store/ui'
-import { useSettingsStore } from '../../store/settings'
 import { useEffect } from 'react'
-import { BYOKConfig } from './BYOKConfig'
 import { X, Settings } from 'lucide-react'
 
 export function SettingsPanel() {
   const { closeSettings } = useUIStore()
-  const { settings, loadSettings } = useSettingsStore()
-
-  useEffect(() => {
-    loadSettings()
-  }, [loadSettings])
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -45,9 +38,12 @@ export function SettingsPanel() {
           {/* BYOK */}
           <section>
             <h3 className="mb-2 text-xs font-medium uppercase tracking-wider text-text-muted">
-              Bring Your Own Key
+              Provider Fallbacks
             </h3>
-            <BYOKConfig />
+            <p className="text-xs text-text-secondary">
+              Bring-your-own-key support is planned, but it is intentionally hidden in this build
+              until provider routing and model selection are fully wired.
+            </p>
           </section>
 
           {/* Keyboard Shortcuts */}

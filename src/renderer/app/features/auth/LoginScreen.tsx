@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useAuthStore } from '../../store/auth'
 import { Github, KeyRound, Smartphone, Loader2, AlertCircle } from 'lucide-react'
 
@@ -12,6 +12,16 @@ export function LoginScreen() {
     if (!patInput.trim()) return
     await loginPAT(patInput.trim())
   }
+
+  useEffect(() => {
+    const handler = (data: unknown) => {
+      const d = data as { code: string; uri: string }
+      setDeviceCode(d)
+    }
+
+    window.api.on('auth:device-code', handler)
+    return () => window.api.off('auth:device-code', handler)
+  }, [])
 
   return (
     <div className="flex h-full items-center justify-center bg-bg-base">
@@ -41,18 +51,11 @@ export function LoginScreen() {
             className="flex items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-50"
           >
             {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Github size={16} />}
-            Login with GitHub
+            Continue with GitHub
           </button>
 
           <button
-            onClick={async () => {
-              // Listen for device code event
-              window.api.on('auth:device-code', (data: unknown) => {
-                const d = data as { code: string; uri: string }
-                setDeviceCode(d)
-              })
-              await loginDevice()
-            }}
+            onClick={loginDevice}
             disabled={isLoading}
             className="flex items-center justify-center gap-2 rounded-lg border border-border bg-bg-elevated px-4 py-2 text-sm text-text-primary hover:bg-bg-hover disabled:opacity-50"
           >
@@ -63,7 +66,7 @@ export function LoginScreen() {
           {deviceCode && (
             <div className="rounded-lg border border-accent/30 bg-accent/5 p-3 text-center">
               <p className="text-xs text-text-secondary">
-                Visit{' '}
+                Open{' '}
                 <span className="font-mono text-accent">{deviceCode.uri}</span>
               </p>
               <p className="mt-1 font-mono text-lg font-bold tracking-widest text-text-primary">

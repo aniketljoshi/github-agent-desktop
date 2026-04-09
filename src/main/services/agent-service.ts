@@ -3,12 +3,13 @@ import { handlePermissionRequest, resolvePermission } from '../copilot/permissio
 import { getMainWindow } from '../windows'
 import { getToken } from '../auth/token-store'
 import { getWorkspaceInfo } from '../workspace/workspace'
-import { AGENT_EVENT, AGENT_PERMISSION_REQUEST, CHAT_STREAM_DELTA } from '../../shared/events'
+import { AGENT_EVENT } from '../../shared/events'
 import type { AgentSessionSummary } from '../../shared/types'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 let currentSession: any = null
 let sdkInitialized = false
+const sessions = new Map<string, any>()
 
 async function ensureSDK(): Promise<void> {
   if (sdkInitialized) return
@@ -33,7 +34,11 @@ function buildHandlers() {
       return handlePermissionRequest(request, root)
     },
     onStreamDelta: (delta: string) => {
-      emit(CHAT_STREAM_DELTA, { sessionId: currentSession?.sessionId ?? '', content: delta })
+      emit(AGENT_EVENT, {
+        type: 'message-delta',
+        sessionId: currentSession?.sessionId ?? '',
+        content: delta
+      })
     },
     onMessage: (content: string) => {
       emit(AGENT_EVENT, { type: 'message', content })
@@ -62,6 +67,7 @@ export async function startAgent(params: {
     buildHandlers()
   )
   currentSession = session
+  sessions.set(session.sessionId ?? 'session', session)
 
   // Send the initial message (don't await — it streams)
   adapter.sendMessage(session, params.prompt).catch((err: Error) => {
@@ -72,12 +78,15 @@ export async function startAgent(params: {
 }
 
 export async function sendAgentMessage(sessionId: string, prompt: string): Promise<void> {
-  if (!currentSession) throw new Error('No active agent session')
-  await adapter.sendMessage(currentSession, prompt)
+  const session = sessions.get(sessionId)
+  if (!session) throw new Error(`Unknown agent session: ${sessionId}`)
+  currentSession = session
+  await adapter.sendMessage(session, prompt)
 }
 
 export async function abortAgent(): Promise<void> {
   if (currentSession) {
+    sessions.delete(currentSession.sessionId ?? '')
     await adapter.abortSession(currentSession)
     currentSession = null
   }
@@ -86,6 +95,7 @@ export async function abortAgent(): Promise<void> {
 export async function resumeAgent(sessionId: string): Promise<void> {
   await ensureSDK()
   currentSession = await adapter.resumeSession(sessionId, buildHandlers())
+  sessions.set(sessionId, currentSession)
 }
 
 export async function listAgentSessions(): Promise<AgentSessionSummary[]> {
@@ -100,6 +110,7 @@ export async function listAgentSessions(): Promise<AgentSessionSummary[]> {
 
 export async function deleteAgentSession(sessionId: string): Promise<void> {
   await ensureSDK()
+  sessions.delete(sessionId)
   await adapter.deleteSession(sessionId)
 }
 

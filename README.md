@@ -85,19 +85,14 @@ Shell commands are classified by a risk engine before they reach you:
 | **Review** | `npm install`, `node script.js` | Show for approval |
 | **Dangerous** | `rm -rf`, `sudo`, `curl \| bash` | Blocked + warning |
 
-### Bring Your Own Key (BYOK)
+### BYOK Status
 
-Don't have GitHub Models access? Point Ask and Plan modes at any OpenAI-compatible endpoint:
-
-```
-Provider:  OpenAI / Anthropic / local
-API Key:   sk-...
-Base URL:  https://api.openai.com/v1
-```
+Bring-your-own-key support is planned, but it is intentionally hidden in this build until
+provider routing and model selection are fully wired.
 
 ### Additional Highlights
 
-- **GitHub OAuth + Device Flow + PAT** — three auth paths, all encrypting tokens via the OS keychain
+- **GitHub browser sign-in + Device Flow + PAT** — three auth paths, all encrypting tokens via the OS keychain
 - **Model picker** — browse the full GitHub Models catalog, grouped by publisher, with capability badges
 - **Monaco diff viewer** — review every proposed file change in a real code editor
 - **Integrated terminal** — xterm.js panel for command output and interaction
@@ -135,7 +130,7 @@ pnpm dev
 
 ### First Launch
 
-1. Click **Login with GitHub** (opens your browser for OAuth)
+1. Click **Continue with GitHub** (opens your browser and shows a device code in-app)
 2. Pick a model from the catalog
 3. Start with **Ask** mode — type a question
 4. Switch to **Plan** to generate a structured plan
@@ -368,7 +363,7 @@ pnpm test            # before you push
 
 - [ ] **v0.1** — Current: Ask, Plan, Agent with GitHub OAuth + Models + Copilot SDK
 - [ ] **v0.2** — Session history persistence, conversation export, file context improvements
-- [ ] **v0.3** — BYOK Agent mode (adapter for non-GitHub providers)
+- [ ] **v0.3** — BYOK Ask/Plan, then BYOK Agent mode once provider routing is stable
 - [ ] **v0.4** — MCP tool support, custom tool definitions
 - [ ] **v0.5** — Multi-workspace support, project switching
 - [ ] **v1.0** — Stable release with auto-update
