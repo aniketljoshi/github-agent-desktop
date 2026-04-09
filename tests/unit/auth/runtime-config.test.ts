@@ -60,17 +60,17 @@ describe('getRuntimeEnvFileCandidates', () => {
   it('includes resources, executable directory, and userData in packaged mode', () => {
     const candidates = getRuntimeEnvFileCandidates({
       isPackaged: true,
-      cwd: 'C:\\repo',
-      execPath: 'C:\\Program Files\\GitHub Agent Desktop\\GitHub Agent Desktop.exe',
-      resourcesPath: 'C:\\Program Files\\GitHub Agent Desktop\\resources',
-      userDataPath: 'C:\\Users\\user\\AppData\\Roaming\\GitHub Agent Desktop'
+      cwd: '/repo',
+      execPath: '/opt/GitHub Agent Desktop/GitHub Agent Desktop',
+      resourcesPath: '/opt/GitHub Agent Desktop/resources',
+      userDataPath: '/home/user/.config/GitHub Agent Desktop'
     })
 
     const normalizedCandidates = candidates.map(normalizePathSeparators)
 
-    expect(normalizedCandidates).toContain('C:/Program Files/GitHub Agent Desktop/resources/.env')
-    expect(normalizedCandidates).toContain('C:/Program Files/GitHub Agent Desktop/.env.local')
-    expect(normalizedCandidates).toContain('C:/Users/user/AppData/Roaming/GitHub Agent Desktop/.env')
+    expect(normalizedCandidates).toContain('/opt/GitHub Agent Desktop/resources/.env')
+    expect(normalizedCandidates).toContain('/opt/GitHub Agent Desktop/.env.local')
+    expect(normalizedCandidates).toContain('/home/user/.config/GitHub Agent Desktop/.env')
   })
 })
 
