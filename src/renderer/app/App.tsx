@@ -26,8 +26,8 @@ export default function App() {
 
   if (isLoading) {
     return (
-      <div className="flex h-full items-center justify-center bg-bg-base">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+      <div className="app-loading-screen">
+        <div className="app-loading-spinner" />
       </div>
     )
   }
@@ -48,16 +48,16 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-full flex-col bg-bg-base">
+    <div className="app-shell">
       <Topbar />
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="app-main">
         {sidebarOpen && <Sidebar />}
 
-        <div className="flex flex-1 flex-col overflow-hidden">
-          <div className="flex flex-1 overflow-hidden">
-            <div className="flex flex-1 flex-col overflow-hidden">
-              <div className="flex-1 overflow-y-auto">
+        <div className="app-stage">
+          <div className="app-content">
+            <div className="app-center-pane">
+              <div className="app-scroll-region">
                 <CenterContent />
               </div>
               <PromptBox />

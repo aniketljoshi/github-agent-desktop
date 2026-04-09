@@ -20,31 +20,31 @@ export function UserChip() {
   if (!user) return null
 
   return (
-    <div ref={ref} className="no-drag relative">
+    <div ref={ref} className="user-chip-shell no-drag">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 rounded-full px-2 py-1 hover:bg-bg-hover"
+        className="user-chip-trigger"
       >
         <img
           src={user.avatarUrl}
           alt={user.username}
-          className="h-6 w-6 rounded-full"
+          className="user-chip-avatar"
           referrerPolicy="no-referrer"
         />
-        <span className="text-xs text-text-secondary">{user.username}</span>
+        <span className="user-chip-name">{user.username}</span>
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-1 w-48 overflow-hidden rounded-lg border border-border bg-bg-elevated shadow-lg">
-          <div className="border-b border-border-subtle px-3 py-2">
-            <p className="text-sm font-medium text-text-primary">{user.username}</p>
+        <div className="user-chip-menu">
+          <div className="user-chip-menu-header">
+            <p>{user.username}</p>
           </div>
           <button
             onClick={() => {
               setOpen(false)
               openSettings()
             }}
-            className="flex w-full items-center gap-2 px-3 py-2 text-xs text-text-secondary hover:bg-bg-hover"
+            className="user-chip-menu-item"
           >
             <Settings size={14} />
             Settings
@@ -54,7 +54,7 @@ export function UserChip() {
               setOpen(false)
               logout()
             }}
-            className="flex w-full items-center gap-2 px-3 py-2 text-xs text-danger hover:bg-bg-hover"
+            className="user-chip-menu-item user-chip-menu-item--danger"
           >
             <LogOut size={14} />
             Logout

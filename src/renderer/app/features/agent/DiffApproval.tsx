@@ -1,7 +1,7 @@
-import { useEffect, useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
+import { FileEdit, Check, X } from 'lucide-react'
 import { useSessionStore } from '../../store/session'
 import type { PermissionRequest } from '../../../../shared/types'
-import { FileEdit, Check, X } from 'lucide-react'
 
 interface Props {
   request: PermissionRequest
@@ -20,44 +20,47 @@ export function DiffApproval({ request }: Props) {
   )
 
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault()
+    const handler = (event: KeyboardEvent) => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault()
         approve()
       }
-      if (e.key === 'Escape') {
-        e.preventDefault()
+
+      if (event.key === 'Escape') {
+        event.preventDefault()
         deny()
       }
     }
+
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
   }, [approve, deny])
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-[600px] max-h-[80vh] overflow-hidden rounded-xl border border-border bg-bg-surface shadow-2xl">
-        <div className="flex items-center gap-2 border-b border-border px-4 py-3">
-          <FileEdit size={16} className="text-warning" />
-          <h3 className="text-sm font-medium text-text-primary">File Write Approval</h3>
+    <div className="overlay-backdrop">
+      <div className="overlay-dialog overlay-dialog--wide">
+        <div className="overlay-header">
+          <div className="overlay-title-wrap">
+            <FileEdit size={16} className="overlay-title-icon is-warning" />
+            <h3 className="overlay-title">Approve file change</h3>
+          </div>
         </div>
 
-        <div className="p-4">
-          {request.fileName && (
-            <p className="mb-2 font-mono text-xs text-text-secondary">{request.fileName}</p>
-          )}
-          <div className="max-h-[50vh] overflow-auto rounded-lg border border-border-subtle bg-bg-base p-3">
+        <div className="overlay-body">
+          {request.fileName && <p className="overlay-file-label">{request.fileName}</p>}
+
+          <div className="overlay-code-block">
             {request.diff ? (
-              <pre className="text-xs leading-relaxed">
-                {request.diff.split('\n').map((line, i) => (
+              <pre className="overlay-diff">
+                {request.diff.split('\n').map((line, index) => (
                   <div
-                    key={i}
+                    key={index}
                     className={
                       line.startsWith('+')
-                        ? 'text-success'
+                        ? 'overlay-diff-line is-added'
                         : line.startsWith('-')
-                          ? 'text-danger'
-                          : 'text-text-secondary'
+                          ? 'overlay-diff-line is-removed'
+                          : 'overlay-diff-line'
                     }
                   >
                     {line}
@@ -65,24 +68,17 @@ export function DiffApproval({ request }: Props) {
                 ))}
               </pre>
             ) : (
-              <p className="text-xs text-text-muted">No diff preview available</p>
+              <p className="tool-list-empty">No diff preview available.</p>
             )}
           </div>
         </div>
 
-        <div className="flex justify-end gap-2 border-t border-border px-4 py-3">
-          <button
-            onClick={deny}
-            className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-text-secondary hover:bg-bg-hover"
-          >
+        <div className="overlay-actions">
+          <button onClick={deny} className="overlay-button overlay-button--secondary">
             <X size={12} />
             Deny (Esc)
           </button>
-          <button
-            onClick={approve}
-            autoFocus
-            className="flex items-center gap-1.5 rounded-lg bg-success px-3 py-1.5 text-xs font-medium text-white hover:opacity-90"
-          >
+          <button onClick={approve} autoFocus className="overlay-button overlay-button--primary">
             <Check size={12} />
             Approve (Enter)
           </button>

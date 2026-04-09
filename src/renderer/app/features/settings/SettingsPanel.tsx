@@ -1,93 +1,85 @@
-import { useUIStore } from '../../store/ui'
 import { useEffect } from 'react'
 import { X, Settings } from 'lucide-react'
+import { useUIStore } from '../../store/ui'
 
 export function SettingsPanel() {
   const { closeSettings } = useUIStore()
 
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeSettings()
+    const handler = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        closeSettings()
+      }
     }
+
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
   }, [closeSettings])
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="h-[70vh] w-[500px] overflow-hidden rounded-xl border border-border bg-bg-surface shadow-2xl">
-        <div className="flex items-center justify-between border-b border-border px-4 py-3">
-          <div className="flex items-center gap-2">
-            <Settings size={16} className="text-text-secondary" />
-            <h2 className="text-sm font-medium text-text-primary">Settings</h2>
+    <div className="overlay-backdrop">
+      <div className="overlay-dialog settings-dialog">
+        <div className="overlay-header">
+          <div className="overlay-title-wrap">
+            <Settings size={16} className="overlay-title-icon" />
+            <h2 className="overlay-title">Settings</h2>
           </div>
-          <button onClick={closeSettings} className="rounded p-1 text-text-muted hover:bg-bg-hover">
+          <button onClick={closeSettings} className="settings-close-button">
             <X size={16} />
           </button>
         </div>
 
-        <div className="flex flex-col gap-6 overflow-y-auto p-4">
-          {/* Theme */}
-          <section>
-            <h3 className="mb-2 text-xs font-medium uppercase tracking-wider text-text-muted">
-              Appearance
-            </h3>
-            <p className="text-xs text-text-secondary">Dark theme (other themes coming soon)</p>
+        <div className="settings-body">
+          <section className="settings-section">
+            <h3 className="settings-heading">Appearance</h3>
+            <p className="settings-copy">
+              Dark theme is the default in this build. Additional themes can land once the core
+              agent surfaces settle.
+            </p>
           </section>
 
-          {/* BYOK */}
-          <section>
-            <h3 className="mb-2 text-xs font-medium uppercase tracking-wider text-text-muted">
-              Provider Fallbacks
-            </h3>
-            <p className="text-xs text-text-secondary">
+          <section className="settings-section">
+            <h3 className="settings-heading">Provider fallback</h3>
+            <p className="settings-copy">
               Bring-your-own-key support is planned, but it is intentionally hidden in this build
               until provider routing and model selection are fully wired.
             </p>
           </section>
 
-          {/* Keyboard Shortcuts */}
-          <section>
-            <h3 className="mb-2 text-xs font-medium uppercase tracking-wider text-text-muted">
-              Keyboard Shortcuts
-            </h3>
-            <div className="flex flex-col gap-1 text-xs text-text-secondary">
-              <div className="flex justify-between">
+          <section className="settings-section">
+            <h3 className="settings-heading">Keyboard shortcuts</h3>
+            <div className="settings-shortcuts">
+              <div className="settings-shortcut-row">
                 <span>Send message</span>
-                <kbd className="rounded bg-bg-base px-1.5 py-0.5 font-mono text-[10px]">
-                  Ctrl+Enter
-                </kbd>
+                <kbd>Ctrl+Enter</kbd>
               </div>
-              <div className="flex justify-between">
+              <div className="settings-shortcut-row">
                 <span>Ask mode</span>
-                <kbd className="rounded bg-bg-base px-1.5 py-0.5 font-mono text-[10px]">Ctrl+1</kbd>
+                <kbd>Ctrl+1</kbd>
               </div>
-              <div className="flex justify-between">
+              <div className="settings-shortcut-row">
                 <span>Plan mode</span>
-                <kbd className="rounded bg-bg-base px-1.5 py-0.5 font-mono text-[10px]">Ctrl+2</kbd>
+                <kbd>Ctrl+2</kbd>
               </div>
-              <div className="flex justify-between">
+              <div className="settings-shortcut-row">
                 <span>Agent mode</span>
-                <kbd className="rounded bg-bg-base px-1.5 py-0.5 font-mono text-[10px]">Ctrl+3</kbd>
+                <kbd>Ctrl+3</kbd>
               </div>
-              <div className="flex justify-between">
+              <div className="settings-shortcut-row">
                 <span>Approve action</span>
-                <kbd className="rounded bg-bg-base px-1.5 py-0.5 font-mono text-[10px]">Enter</kbd>
+                <kbd>Enter</kbd>
               </div>
-              <div className="flex justify-between">
+              <div className="settings-shortcut-row">
                 <span>Deny action</span>
-                <kbd className="rounded bg-bg-base px-1.5 py-0.5 font-mono text-[10px]">Escape</kbd>
+                <kbd>Escape</kbd>
               </div>
             </div>
           </section>
 
-          {/* About */}
-          <section>
-            <h3 className="mb-2 text-xs font-medium uppercase tracking-wider text-text-muted">
-              About
-            </h3>
-            <p className="text-xs text-text-secondary">
-              GitHub Agent Desktop v0.1.0 — An unofficial GitHub-native desktop coding agent.
+          <section className="settings-section">
+            <h3 className="settings-heading">About</h3>
+            <p className="settings-copy">
+              GitHub Agent Desktop v0.1.0 - An unofficial GitHub-native desktop coding agent.
             </p>
           </section>
         </div>

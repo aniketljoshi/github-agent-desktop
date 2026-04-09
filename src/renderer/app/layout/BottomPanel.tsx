@@ -12,17 +12,13 @@ export function BottomPanel() {
   const { bottomPanelTab, setBottomPanelTab } = useUIStore()
 
   return (
-    <div className="flex h-[200px] shrink-0 flex-col border-t border-border bg-bg-surface">
-      <div className="flex items-center gap-1 border-b border-border-subtle px-2 py-1">
+    <div className="bottom-shell">
+      <div className="bottom-tabs">
         {TABS.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
             onClick={() => setBottomPanelTab(id)}
-            className={`flex items-center gap-1.5 rounded px-2 py-1 text-xs ${
-              bottomPanelTab === id
-                ? 'bg-bg-elevated text-text-primary'
-                : 'text-text-secondary hover:text-text-primary'
-            }`}
+            className={`bottom-tab ${bottomPanelTab === id ? 'is-active' : ''}`}
           >
             <Icon size={12} />
             {label}
@@ -30,11 +26,11 @@ export function BottomPanel() {
         ))}
       </div>
 
-      <div className="flex-1 overflow-auto p-2">
+      <div className="bottom-body">
         {bottomPanelTab === 'terminal' && <TerminalPanel />}
-        {bottomPanelTab === 'diff' && <p className="text-xs text-text-muted">No diff to display</p>}
+        {bottomPanelTab === 'diff' && <p className="bottom-empty">No diff to display.</p>}
         {bottomPanelTab === 'diagnostics' && (
-          <p className="text-xs text-text-muted">No diagnostics</p>
+          <p className="bottom-empty">No diagnostics.</p>
         )}
       </div>
     </div>

@@ -6,16 +6,16 @@ export function RightInspector() {
   const { mode, agentRun, messages } = useSessionStore()
 
   return (
-    <aside className="flex w-[280px] shrink-0 flex-col border-l border-border bg-bg-surface">
-      <div className="flex items-center gap-2 border-b border-border-subtle px-3 py-2 text-xs font-medium uppercase tracking-wider text-text-muted">
+    <aside className="inspector-shell">
+      <div className="inspector-header">
         <Info size={12} />
         Inspector
       </div>
 
-      <div className="flex-1 overflow-y-auto p-3">
+      <div className="inspector-body">
         {mode === 'ask' && (
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-2 text-xs text-text-secondary">
+          <div className="inspector-card-stack">
+            <div className="inspector-stat-card">
               <Cpu size={12} />
               <span>Messages: {messages.length}</span>
             </div>
@@ -23,21 +23,21 @@ export function RightInspector() {
         )}
 
         {mode === 'plan' && (
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-2 text-xs text-text-secondary">
+          <div className="inspector-card-stack">
+            <div className="inspector-stat-card">
               <FileCode size={12} />
-              <span>Plan mode</span>
+              <span>Structured execution planning</span>
             </div>
           </div>
         )}
 
         {mode === 'agent' && agentRun && (
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-2 text-xs text-text-secondary">
+          <div className="inspector-card-stack">
+            <div className="inspector-stat-card">
               <Clock size={12} />
               <span>Status: {agentRun.status}</span>
             </div>
-            <div className="flex items-center gap-2 text-xs text-text-secondary">
+            <div className="inspector-stat-card">
               <Cpu size={12} />
               <span>Tools: {agentRun.toolInvocations.length}</span>
             </div>
@@ -46,7 +46,7 @@ export function RightInspector() {
         )}
 
         {mode === 'agent' && !agentRun && (
-          <p className="text-xs text-text-muted">Start an agent session to see execution details</p>
+          <p className="inspector-empty">Start an agent session to see execution details.</p>
         )}
       </div>
     </aside>
