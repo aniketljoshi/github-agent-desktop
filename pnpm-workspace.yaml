@@ -1,0 +1,14 @@
+allowBuilds:
+  ',': true
+  b: true
+  c: true
+  d: true
+  e: true
+  i: true
+  l: true
+  n: true
+  o: true
+  r: true
+  s: true
+  t: true
+  u: true

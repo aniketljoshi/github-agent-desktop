@@ -1,0 +1,48 @@
+/*
+ * Design tokens — "Codex Calm"
+ *
+ * Dense but readable, subtle elevation, muted contrast,
+ * restrained motion. No decorative blur/glow competing
+ * with execution detail.
+ */
+
+@theme {
+  /* ── Backgrounds ──────────────────────────────────────── */
+  --color-bg-base: oklch(14% 0.01 250);
+  --color-bg-surface: oklch(18% 0.008 250);
+  --color-bg-elevated: oklch(22% 0.008 250);
+  --color-bg-hover: oklch(25% 0.008 250);
+
+  /* ── Borders ──────────────────────────────────────────── */
+  --color-border: oklch(26% 0.006 250);
+  --color-border-subtle: oklch(22% 0.004 250);
+
+  /* ── Text ─────────────────────────────────────────────── */
+  --color-text-primary: oklch(90% 0 0);
+  --color-text-secondary: oklch(58% 0 0);
+  --color-text-muted: oklch(42% 0 0);
+
+  /* ── Accent / status ──────────────────────────────────── */
+  --color-accent: oklch(68% 0.14 200);
+  --color-accent-hover: oklch(72% 0.16 200);
+  --color-danger: oklch(62% 0.2 25);
+  --color-danger-hover: oklch(66% 0.22 25);
+  --color-success: oklch(68% 0.16 155);
+  --color-warning: oklch(72% 0.16 75);
+
+  /* ── Fonts ────────────────────────────────────────────── */
+  --font-ui: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+
+  /* ── Sizing ───────────────────────────────────────────── */
+  --sidebar-width: 240px;
+  --inspector-width: 280px;
+  --topbar-height: 44px;
+  --bottom-panel-height: 200px;
+  --prompt-height: 56px;
+
+  /* ── Motion ───────────────────────────────────────────── */
+  --duration-fast: 100ms;
+  --duration-normal: 200ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
