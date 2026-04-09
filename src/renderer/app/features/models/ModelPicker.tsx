@@ -72,9 +72,13 @@ export function ModelPicker({ compact = false }: { compact?: boolean }) {
         <div className="model-picker-menu">
           <div className="model-picker-search-wrap">
             <div className="model-picker-menu-header">
-              <span className="model-picker-menu-title">Available to your GitHub access</span>
+              <span className="model-picker-menu-title">Available to your Copilot access</span>
               <span className="model-picker-menu-meta">
-                {mode === 'agent' ? 'Tool-capable only' : `${availableModels.length} models`}
+                {isLoading
+                  ? 'Loading...'
+                  : mode === 'agent'
+                    ? 'Tool-capable only'
+                    : `${availableModels.length} models`}
               </span>
             </div>
             <div className="model-picker-search">
@@ -113,6 +117,9 @@ export function ModelPicker({ compact = false }: { compact?: boolean }) {
                       <div className="model-picker-option-meta">
                         <span>{formatContextWindow(model)}</span>
                         <span>{model.publisher}</span>
+                        {typeof model.requestMultiplier === 'number' && (
+                          <span>{formatMultiplier(model.requestMultiplier)}</span>
+                        )}
                         <div className="model-picker-option-icons">
                           {model.capabilities.includes('streaming') && (
                             <span className="model-capability-pill" title="Streaming">
@@ -172,4 +179,8 @@ function formatContextWindow(model: ModelCatalogEntry): string {
   }
 
   return `${rawContext} tokens`
+}
+
+function formatMultiplier(multiplier: number): string {
+  return `${multiplier}x`
 }

@@ -39,7 +39,7 @@ import {
   storeAuthMethod,
   storeToken
 } from './auth/token-store'
-import { fetchModelCatalog } from './github/models'
+import { fetchAccessibleModelCatalog } from './github/models'
 import * as askService from './services/ask-service'
 import * as planService from './services/plan-service'
 import * as agentService from './services/agent-service'
@@ -144,7 +144,7 @@ export function registerAllHandlers(): void {
     validated(ipcSchemas['models:catalog'], async () => {
       const token = getToken('github')
       if (!token) throw new Error('Not authenticated')
-      return fetchModelCatalog(token)
+      return fetchAccessibleModelCatalog(token)
     })
   )
 

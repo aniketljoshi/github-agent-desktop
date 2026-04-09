@@ -1,11 +1,13 @@
 import { app, BrowserWindow, shell } from 'electron'
 import { join } from 'path'
+import { logStartup } from './startup-log'
 
 const isDev = !app.isPackaged
 
 let mainWindow: BrowserWindow | null = null
 
 export function createMainWindow(): BrowserWindow {
+  logStartup('createMainWindow invoked')
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 820,
@@ -32,7 +34,35 @@ export function createMainWindow(): BrowserWindow {
     }
   })
 
-  mainWindow.on('ready-to-show', () => mainWindow?.show())
+  const revealWindow = () => {
+    if (!mainWindow || mainWindow.isDestroyed()) {
+      return
+    }
+
+    if (!mainWindow.isVisible()) {
+      mainWindow.show()
+    }
+  }
+
+  const revealTimeout = setTimeout(revealWindow, 1500)
+
+  mainWindow.on('ready-to-show', () => {
+    clearTimeout(revealTimeout)
+    logStartup('main window ready-to-show')
+    revealWindow()
+  })
+  mainWindow.webContents.on('did-finish-load', () => {
+    logStartup('main window did-finish-load')
+    revealWindow()
+  })
+  mainWindow.webContents.on('did-fail-load', (_event, errorCode, errorDescription) => {
+    logStartup(`main window did-fail-load: ${errorCode} ${errorDescription}`)
+    revealWindow()
+  })
+  mainWindow.on('closed', () => {
+    logStartup('main window closed')
+    clearTimeout(revealTimeout)
+  })
   mainWindow.setMenuBarVisibility(false)
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {

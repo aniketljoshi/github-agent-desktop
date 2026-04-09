@@ -5,6 +5,7 @@ const stopMock = vi.fn()
 const createSessionMock = vi.fn()
 const resumeSessionMock = vi.fn()
 const listSessionsMock = vi.fn()
+const listModelsMock = vi.fn()
 const deleteSessionMock = vi.fn()
 
 const CopilotClientMock = vi.fn().mockImplementation(() => ({
@@ -13,6 +14,7 @@ const CopilotClientMock = vi.fn().mockImplementation(() => ({
   createSession: createSessionMock,
   resumeSession: resumeSessionMock,
   listSessions: listSessionsMock,
+  listModels: listModelsMock,
   deleteSession: deleteSessionMock
 }))
 
@@ -48,6 +50,19 @@ describe('copilot adapter', () => {
       useLoggedInUser: false
     })
     expect(startMock).toHaveBeenCalled()
+  })
+
+  it('reuses the existing client for the same token and recreates it for a new token', async () => {
+    const adapter = await import('../../../src/main/copilot/adapter')
+
+    await adapter.loadSDK()
+    await adapter.initClient('token-a')
+    await adapter.initClient('token-a')
+    await adapter.initClient('token-b')
+
+    expect(CopilotClientMock).toHaveBeenCalledTimes(2)
+    expect(startMock).toHaveBeenCalledTimes(2)
+    expect(stopMock).toHaveBeenCalledTimes(1)
   })
 
   it('creates and wires a session with handlers', async () => {
@@ -86,6 +101,17 @@ describe('copilot adapter', () => {
     listSessionsMock.mockResolvedValue([
       { sessionId: 's1', startTime: 1, modifiedTime: 2, summary: 'One', context: 'ctx' }
     ])
+    listModelsMock.mockResolvedValue([
+      {
+        id: 'claude-sonnet-4.6',
+        name: 'Claude Sonnet 4.6',
+        capabilities: {
+          supports: { vision: true, reasoningEffort: false },
+          limits: { max_context_window_tokens: 200000 }
+        },
+        billing: { multiplier: 1 }
+      }
+    ])
 
     const adapter = await import('../../../src/main/copilot/adapter')
     await adapter.loadSDK()
@@ -100,6 +126,17 @@ describe('copilot adapter', () => {
 
     await expect(adapter.listSessions()).resolves.toEqual([
       { sessionId: 's1', startTime: 1, modifiedTime: 2, summary: 'One', context: 'ctx' }
+    ])
+    await expect(adapter.listModels()).resolves.toEqual([
+      {
+        id: 'claude-sonnet-4.6',
+        name: 'Claude Sonnet 4.6',
+        capabilities: {
+          supports: { vision: true, reasoningEffort: false },
+          limits: { max_context_window_tokens: 200000 }
+        },
+        billing: { multiplier: 1 }
+      }
     ])
 
     await adapter.sendMessage(resumed, 'hello')
@@ -127,11 +164,14 @@ describe('copilot adapter', () => {
       'Client not initialized'
     )
     await expect(adapter.listSessions()).resolves.toEqual([])
+    await expect(adapter.listModels()).resolves.toEqual([])
     await expect(adapter.deleteSession('missing')).resolves.toBeUndefined()
 
     await adapter.loadSDK()
     await adapter.initClient('token')
     listSessionsMock.mockRejectedValueOnce(new Error('boom'))
+    listModelsMock.mockRejectedValueOnce(new Error('boom'))
     await expect(adapter.listSessions()).resolves.toEqual([])
+    await expect(adapter.listModels()).resolves.toEqual([])
   })
 })
