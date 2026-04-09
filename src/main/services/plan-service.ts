@@ -70,14 +70,14 @@ export function parsePlanResponse(raw: string, model: string): PlanDocument {
   return {
     id: randomUUID(),
     goal: obj.goal,
-    assumptions: Array.isArray(obj.assumptions)
-      ? (obj.assumptions as string[]).map(String)
-      : [],
+    assumptions: Array.isArray(obj.assumptions) ? (obj.assumptions as string[]).map(String) : [],
     steps: (obj.steps as Array<Record<string, unknown>>).map((s) => ({
       title: String(s.title ?? 'Untitled step'),
       why: String(s.why ?? ''),
       files: Array.isArray(s.files) ? (s.files as string[]).map(String) : [],
-      risk: validRisks.has(String(s.risk)) ? (String(s.risk) as 'low' | 'medium' | 'high') : 'medium',
+      risk: validRisks.has(String(s.risk))
+        ? (String(s.risk) as 'low' | 'medium' | 'high')
+        : 'medium',
       status: 'pending' as const
     })),
     createdAt: Date.now(),

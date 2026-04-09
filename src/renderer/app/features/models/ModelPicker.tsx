@@ -47,9 +47,7 @@ export function ModelPicker() {
         className="flex items-center gap-1.5 rounded-md border border-border-subtle px-2 py-1 text-xs text-text-secondary hover:bg-bg-hover"
       >
         <Zap size={12} className="text-accent" />
-        <span className="max-w-[120px] truncate">
-          {currentModel?.name ?? 'Select model'}
-        </span>
+        <span className="max-w-[120px] truncate">{currentModel?.name ?? 'Select model'}</span>
         <ChevronDown size={12} />
       </button>
 

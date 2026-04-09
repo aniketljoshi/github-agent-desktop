@@ -59,7 +59,9 @@ export async function createSession(
   })
 
   if (handlers.onStreamDelta) {
-    session.on('assistant.message_delta', (e: any) => handlers.onStreamDelta!(e.data?.deltaContent ?? ''))
+    session.on('assistant.message_delta', (e: any) =>
+      handlers.onStreamDelta!(e.data?.deltaContent ?? '')
+    )
   }
   if (handlers.onMessage) {
     session.on('assistant.message', (e: any) => handlers.onMessage!(e.data?.content ?? ''))
@@ -77,17 +79,16 @@ export async function createSession(
   return session
 }
 
-export async function resumeSession(
-  sessionId: string,
-  handlers: SessionHandlers
-): Promise<any> {
+export async function resumeSession(sessionId: string, handlers: SessionHandlers): Promise<any> {
   if (!client) throw new Error('Client not initialized')
   const session = await client.resumeSession(sessionId, {
     onPermissionRequest: handlers.onPermission
   })
 
   if (handlers.onStreamDelta) {
-    session.on('assistant.message_delta', (e: any) => handlers.onStreamDelta!(e.data?.deltaContent ?? ''))
+    session.on('assistant.message_delta', (e: any) =>
+      handlers.onStreamDelta!(e.data?.deltaContent ?? '')
+    )
   }
   if (handlers.onMessage) {
     session.on('assistant.message', (e: any) => handlers.onMessage!(e.data?.content ?? ''))

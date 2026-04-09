@@ -279,15 +279,12 @@ export function registerAllHandlers(): void {
 
   ipcMain.handle(
     SETTINGS_SET_BYOK,
-    validated(
-      ipcSchemas['settings:set-byok'],
-      async (args: BYOKConfig & { apiKey: string }) => {
-        const { apiKey, ...rest } = args
+    validated(ipcSchemas['settings:set-byok'], async (args: BYOKConfig & { apiKey: string }) => {
+      const { apiKey, ...rest } = args
       storeToken('byok', apiKey)
       const current = settingsStore.get()
       settingsStore.set({ ...current, hasBYOK: true, byokConfig: rest })
-      }
-    )
+    })
   )
 
   ipcMain.handle(

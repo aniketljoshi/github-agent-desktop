@@ -66,8 +66,7 @@ export function LoginScreen() {
           {deviceCode && (
             <div className="rounded-lg border border-accent/30 bg-accent/5 p-3 text-center">
               <p className="text-xs text-text-secondary">
-                Open{' '}
-                <span className="font-mono text-accent">{deviceCode.uri}</span>
+                Open <span className="font-mono text-accent">{deviceCode.uri}</span>
               </p>
               <p className="mt-1 font-mono text-lg font-bold tracking-widest text-text-primary">
                 {deviceCode.code}

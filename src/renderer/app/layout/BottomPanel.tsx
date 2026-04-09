@@ -32,9 +32,7 @@ export function BottomPanel() {
 
       <div className="flex-1 overflow-auto p-2">
         {bottomPanelTab === 'terminal' && <TerminalPanel />}
-        {bottomPanelTab === 'diff' && (
-          <p className="text-xs text-text-muted">No diff to display</p>
-        )}
+        {bottomPanelTab === 'diff' && <p className="text-xs text-text-muted">No diff to display</p>}
         {bottomPanelTab === 'diagnostics' && (
           <p className="text-xs text-text-muted">No diagnostics</p>
         )}

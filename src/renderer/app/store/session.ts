@@ -148,7 +148,10 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     }
 
     set({
-      messages: [...msgs, { id: crypto.randomUUID(), role: 'assistant', content, timestamp: Date.now() }]
+      messages: [
+        ...msgs,
+        { id: crypto.randomUUID(), role: 'assistant', content, timestamp: Date.now() }
+      ]
     })
   },
 

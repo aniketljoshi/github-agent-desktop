@@ -18,7 +18,9 @@ function StepCard({ step, index }: { step: PlanStepType; index: number }) {
           </span>
           <h4 className="text-sm font-medium text-text-primary">{step.title}</h4>
         </div>
-        <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${RISK_STYLES[step.risk]}`}>
+        <span
+          className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${RISK_STYLES[step.risk]}`}
+        >
           {step.risk}
         </span>
       </div>

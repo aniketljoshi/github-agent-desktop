@@ -84,7 +84,7 @@ export const INVOKE_CHANNELS = [
   SETTINGS_GET,
   SETTINGS_SET,
   SETTINGS_SET_BYOK,
-  SETTINGS_CLEAR_BYOK,
+  SETTINGS_CLEAR_BYOK
 ] as const
 
 // ─── All push channels (main → renderer, no response expected)
@@ -94,7 +94,7 @@ export const PUSH_CHANNELS = [
   AGENT_EVENT,
   AGENT_PERMISSION_REQUEST,
   TERMINAL_OUTPUT,
-  AUTH_DEVICE_CODE,
+  AUTH_DEVICE_CODE
 ] as const
 
 export type InvokeChannel = (typeof INVOKE_CHANNELS)[number]

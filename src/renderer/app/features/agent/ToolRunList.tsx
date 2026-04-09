@@ -28,7 +28,9 @@ export function ToolRunList({ tools }: { tools: ToolInvocation[] }) {
 
   return (
     <div className="flex flex-col gap-1">
-      <h4 className="text-[10px] font-medium uppercase tracking-wider text-text-muted">Tool Calls</h4>
+      <h4 className="text-[10px] font-medium uppercase tracking-wider text-text-muted">
+        Tool Calls
+      </h4>
       {tools.map((tool) => {
         const Icon = toolIcon(tool.toolName)
         const StatusIcon = STATUS_ICON[tool.status] ?? Clock

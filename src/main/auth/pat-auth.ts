@@ -1,6 +1,4 @@
-export async function validatePAT(
-  token: string
-): Promise<{ username: string; avatarUrl: string }> {
+export async function validatePAT(token: string): Promise<{ username: string; avatarUrl: string }> {
   if (!token) throw new Error('Token is required')
 
   const res = await fetch('https://api.github.com/user', {

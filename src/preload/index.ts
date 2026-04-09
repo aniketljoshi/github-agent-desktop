@@ -18,8 +18,7 @@ const listeners = new Map<string, Map<(...args: unknown[]) => void, (...args: un
 
 // Build invoke methods for every channel
 for (const channel of INVOKE_CHANNELS) {
-  ;(api as Record<string, unknown>)[channel] = (args?: unknown) =>
-    ipcRenderer.invoke(channel, args)
+  ;(api as Record<string, unknown>)[channel] = (args?: unknown) => ipcRenderer.invoke(channel, args)
 }
 
 // Event subscriptions

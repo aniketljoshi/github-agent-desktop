@@ -54,7 +54,9 @@ export function SettingsPanel() {
             <div className="flex flex-col gap-1 text-xs text-text-secondary">
               <div className="flex justify-between">
                 <span>Send message</span>
-                <kbd className="rounded bg-bg-base px-1.5 py-0.5 font-mono text-[10px]">Ctrl+Enter</kbd>
+                <kbd className="rounded bg-bg-base px-1.5 py-0.5 font-mono text-[10px]">
+                  Ctrl+Enter
+                </kbd>
               </div>
               <div className="flex justify-between">
                 <span>Ask mode</span>

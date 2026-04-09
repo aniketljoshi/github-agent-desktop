@@ -10,8 +10,16 @@ const PLACEHOLDERS: Record<string, string> = {
 }
 
 export function PromptBox() {
-  const { mode, isStreaming, sendAskMessage, generatePlan, startAgent, sendAgentMessage, agentRun, abortCurrent } =
-    useSessionStore()
+  const {
+    mode,
+    isStreaming,
+    sendAskMessage,
+    generatePlan,
+    startAgent,
+    sendAgentMessage,
+    agentRun,
+    abortCurrent
+  } = useSessionStore()
   const { selectedModels } = useModelsStore()
   const [input, setInput] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)

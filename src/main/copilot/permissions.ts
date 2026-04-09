@@ -26,12 +26,15 @@ async function askRenderer(request: {
     })
 
     // Timeout after 5 minutes — deny if no response
-    setTimeout(() => {
-      if (pendingRequests.has(request.id)) {
-        pendingRequests.delete(request.id)
-        resolve(false)
-      }
-    }, 5 * 60 * 1000)
+    setTimeout(
+      () => {
+        if (pendingRequests.has(request.id)) {
+          pendingRequests.delete(request.id)
+          resolve(false)
+        }
+      },
+      5 * 60 * 1000
+    )
   })
 }
 
@@ -60,18 +63,14 @@ export async function handlePermissionRequest(
         return { kind: 'denied-interactively-by-user' }
       }
       const approved = await askRenderer({ id, kind, toolName, fileName, diff })
-      return approved
-        ? { kind: 'approved' }
-        : { kind: 'denied-interactively-by-user' }
+      return approved ? { kind: 'approved' } : { kind: 'denied-interactively-by-user' }
     }
 
     case 'shell': {
       const risk = classifyRisk(fullCommandText ?? '')
       if (risk === 'safe') return { kind: 'approved' }
       const approved = await askRenderer({ id, kind, toolName, fullCommandText })
-      return approved
-        ? { kind: 'approved' }
-        : { kind: 'denied-interactively-by-user' }
+      return approved ? { kind: 'approved' } : { kind: 'denied-interactively-by-user' }
     }
     default:
       return { kind: 'denied-interactively-by-user' }

@@ -69,7 +69,8 @@ async function pollForAccessToken(clientId: string, init: DeviceCodeResponse): P
       interval += 5000
       continue
     }
-    if (data.error === 'expired_token') throw new Error('Device code expired - please restart login')
+    if (data.error === 'expired_token')
+      throw new Error('Device code expired - please restart login')
     if (data.error === 'access_denied') throw new Error('Login was denied by the user')
     throw new Error(`Unexpected device flow error: ${data.error}`)
   }

@@ -24,9 +24,7 @@ function MessageBubble({ msg }: { msg: ChatMessage }) {
 
       <div
         className={`max-w-[75%] rounded-xl px-3 py-2 text-sm leading-relaxed ${
-          isUser
-            ? 'bg-bg-elevated text-text-primary'
-            : 'text-text-primary'
+          isUser ? 'bg-bg-elevated text-text-primary' : 'text-text-primary'
         }`}
       >
         {isUser ? (

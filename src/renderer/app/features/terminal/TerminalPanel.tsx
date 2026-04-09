@@ -23,10 +23,7 @@ export function TerminalPanel() {
   return (
     <pre className="font-mono text-xs leading-relaxed">
       {lines.map((line, i) => (
-        <span
-          key={i}
-          className={line.type === 'stderr' ? 'text-danger' : 'text-text-secondary'}
-        >
+        <span key={i} className={line.type === 'stderr' ? 'text-danger' : 'text-text-secondary'}>
           {line.data}
         </span>
       ))}

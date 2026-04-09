@@ -10,8 +10,14 @@ interface Props {
 export function ShellApproval({ request }: Props) {
   const { respondToPermission } = useSessionStore()
 
-  const approve = useCallback(() => respondToPermission(request.id, true), [request.id, respondToPermission])
-  const deny = useCallback(() => respondToPermission(request.id, false), [request.id, respondToPermission])
+  const approve = useCallback(
+    () => respondToPermission(request.id, true),
+    [request.id, respondToPermission]
+  )
+  const deny = useCallback(
+    () => respondToPermission(request.id, false),
+    [request.id, respondToPermission]
+  )
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {

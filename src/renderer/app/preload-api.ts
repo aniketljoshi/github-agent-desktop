@@ -44,7 +44,11 @@ export interface PreloadApi {
   'workspace:list-dir': (args: { dirPath: string }) => Promise<string[]>
   'settings:get': () => Promise<UserSettings>
   'settings:set': (args: Partial<UserSettings>) => Promise<void>
-  'settings:set-byok': (args: { provider: string; apiKey: string; baseUrl: string }) => Promise<void>
+  'settings:set-byok': (args: {
+    provider: string
+    apiKey: string
+    baseUrl: string
+  }) => Promise<void>
   'settings:clear-byok': () => Promise<void>
   on: (channel: string, callback: (...args: unknown[]) => void) => void
   off: (channel: string, callback: (...args: unknown[]) => void) => void
