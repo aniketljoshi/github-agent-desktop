@@ -52,3 +52,17 @@ export function createMainWindow(): BrowserWindow {
 export function getMainWindow(): BrowserWindow | null {
   return mainWindow
 }
+
+export function focusMainWindow(): void {
+  if (!mainWindow) return
+
+  if (mainWindow.isMinimized()) {
+    mainWindow.restore()
+  }
+
+  if (!mainWindow.isVisible()) {
+    mainWindow.show()
+  }
+
+  mainWindow.focus()
+}

@@ -45,6 +45,7 @@ import * as planService from './services/plan-service'
 import * as agentService from './services/agent-service'
 import * as workspace from './workspace/workspace'
 import { settingsStore } from './services/settings-store'
+import { focusMainWindow } from './windows'
 
 const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID ?? ''
 const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET ?? ''
@@ -72,6 +73,7 @@ export function registerAllHandlers(): void {
         GITHUB_CLIENT_SECRET,
         GITHUB_CALLBACK_URL
       )
+      focusMainWindow()
       const user = await validatePAT(token)
       storeToken('github', token)
       storeAuthMethod('github', 'oauth')
@@ -86,6 +88,7 @@ export function registerAllHandlers(): void {
       const token = await authService.startDeviceFlow(GITHUB_CLIENT_ID, (code, uri) => {
         getMainWindow()?.webContents.send('auth:device-code', { code, uri })
       })
+      focusMainWindow()
       const user = await validatePAT(token)
       storeToken('github', token)
       storeAuthMethod('github', 'device-flow')

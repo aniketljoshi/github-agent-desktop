@@ -15,8 +15,10 @@ test.afterEach(async () => {
 
 test('PAT login shows error for invalid token', async () => {
   const window = await app.firstWindow()
+  const patButton = window.getByRole('button', { name: /use personal access token/i })
 
-  await window.getByRole('button', { name: 'Use Personal Access Token' }).click()
+  await expect(patButton).toBeVisible()
+  await patButton.click()
 
   const input = window.locator('input[type="password"]')
   await input.fill('invalid-token')
@@ -28,7 +30,9 @@ test('PAT login shows error for invalid token', async () => {
 
 test('PAT login shows input after clicking PAT option', async () => {
   const window = await app.firstWindow()
-  await window.getByRole('button', { name: 'Use Personal Access Token' }).click()
+  const patButton = window.getByRole('button', { name: /use personal access token/i })
+  await expect(patButton).toBeVisible()
+  await patButton.click()
   const input = window.locator('input[type="password"]')
   await expect(input).toBeVisible()
 })
