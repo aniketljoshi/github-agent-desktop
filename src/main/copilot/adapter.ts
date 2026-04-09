@@ -4,6 +4,7 @@ import type { AgentSessionSummary } from '../../shared/types'
 let CopilotClientClass: any = null
 let client: any = null
 let sdkLoaded = false
+let initializedToken: string | null = null
 
 export async function loadSDK(): Promise<boolean> {
   if (sdkLoaded) return true
@@ -24,14 +25,23 @@ export function isAvailable(): boolean {
 
 export async function initClient(token: string): Promise<void> {
   if (!isAvailable()) throw new Error('Copilot SDK is not available')
+  if (client && initializedToken === token) {
+    return
+  }
+  if (client && initializedToken !== token) {
+    await client.stop()
+    client = null
+  }
   client = new CopilotClientClass({ githubToken: token, useLoggedInUser: false })
   await client.start()
+  initializedToken = token
 }
 
 export async function stopClient(): Promise<void> {
   if (client) {
     await client.stop()
     client = null
+    initializedToken = null
   }
 }
 
@@ -117,6 +127,15 @@ export async function listSessions(): Promise<AgentSessionSummary[]> {
       summary: s.summary ?? '',
       context: s.context
     }))
+  } catch {
+    return []
+  }
+}
+
+export async function listModels(): Promise<any[]> {
+  if (!client) return []
+  try {
+    return (await client.listModels()) ?? []
   } catch {
     return []
   }

@@ -29,6 +29,9 @@ export interface ModelCatalogEntry {
   rateLimitTier: string
   supportedInputModalities: string[]
   tags: string[]
+  requestMultiplier?: number
+  policyState?: 'enabled' | 'disabled' | 'unconfigured'
+  source?: 'copilot-sdk' | 'github-models'
 }
 
 export type Mode = 'ask' | 'plan' | 'agent'

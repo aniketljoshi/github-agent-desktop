@@ -68,4 +68,30 @@ describe('token-store', () => {
     const { storeToken } = await import('../../../src/main/auth/token-store')
     expect(() => storeToken('fail', 'token')).toThrow('Encryption is not available')
   })
+
+  it('returns null when encryption is unavailable or decryption fails', async () => {
+    const { safeStorage } = await import('electron')
+    const { storeToken, getToken } = await import('../../../src/main/auth/token-store')
+
+    storeToken('guarded', 'token')
+    vi.mocked(safeStorage.isEncryptionAvailable).mockReturnValueOnce(false)
+    expect(getToken('guarded')).toBeNull()
+
+    vi.mocked(safeStorage.isEncryptionAvailable).mockReturnValue(true)
+    vi.mocked(safeStorage.decryptString).mockImplementationOnce(() => {
+      throw new Error('bad decrypt')
+    })
+    expect(getToken('guarded')).toBeNull()
+  })
+
+  it('stores and retrieves auth metadata', async () => {
+    const { storeAuthMethod, getAuthMethod, deleteToken } = await import(
+      '../../../src/main/auth/token-store'
+    )
+
+    storeAuthMethod('meta', 'pat')
+    expect(getAuthMethod('meta')).toBe('pat')
+    deleteToken('meta')
+    expect(getAuthMethod('meta')).toBeNull()
+  })
 })

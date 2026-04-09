@@ -10,11 +10,15 @@ test.beforeEach(async () => {
 })
 
 test.afterEach(async () => {
-  await app.close()
+  await app?.close()
 })
 
 test('PAT login shows error for invalid token', async () => {
   const window = await app.firstWindow()
+  await window.evaluate(async () => {
+    await window.api['auth:logout']()
+    window.location.reload()
+  })
   await expect(window.getByText('Sign in to continue')).toBeVisible({ timeout: 15000 })
   const patButton = window.getByRole('button', { name: /use personal access token/i })
 
@@ -31,6 +35,10 @@ test('PAT login shows error for invalid token', async () => {
 
 test('PAT login shows input after clicking PAT option', async () => {
   const window = await app.firstWindow()
+  await window.evaluate(async () => {
+    await window.api['auth:logout']()
+    window.location.reload()
+  })
   await expect(window.getByText('Sign in to continue')).toBeVisible({ timeout: 15000 })
   const patButton = window.getByRole('button', { name: /use personal access token/i })
   await expect(patButton).toBeVisible({ timeout: 15000 })

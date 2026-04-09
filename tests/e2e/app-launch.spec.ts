@@ -10,7 +10,7 @@ test.beforeAll(async () => {
 })
 
 test.afterAll(async () => {
-  await app.close()
+  await app?.close()
 })
 
 test('app launches and shows a window', async () => {
@@ -26,12 +26,20 @@ test('window title contains GitHub Agent Desktop', async () => {
 
 test('login screen is visible when unauthenticated', async () => {
   const window = await app.firstWindow()
+  await window.evaluate(async () => {
+    await window.api['auth:logout']()
+    window.location.reload()
+  })
   const heading = window.locator('h1')
   await expect(heading).toContainText('Supervise agents from a calmer desktop surface.')
 })
 
 test('three auth options are visible', async () => {
   const window = await app.firstWindow()
+  await window.evaluate(async () => {
+    await window.api['auth:logout']()
+    window.location.reload()
+  })
   await expect(window.getByRole('button', { name: 'Continue with GitHub' })).toBeVisible()
   await expect(window.getByRole('button', { name: 'Use Device Code' })).toBeVisible()
   await expect(window.getByRole('button', { name: 'Use Personal Access Token' })).toBeVisible()

@@ -9,7 +9,7 @@ const TABS: { id: Mode; label: string; icon: typeof MessageSquare; shortcut: str
   { id: 'agent', label: 'Agent', icon: Bot, shortcut: '3' }
 ]
 
-export function ModeTabs() {
+export function ModeTabs({ compact = false }: { compact?: boolean }) {
   const { mode, setMode } = useSessionStore()
 
   useEffect(() => {
@@ -27,7 +27,7 @@ export function ModeTabs() {
   }, [setMode])
 
   return (
-    <div className="mode-switch no-drag">
+    <div className={`mode-switch no-drag ${compact ? 'is-compact' : ''}`}>
       {TABS.map(({ id, label, icon: Icon }) => (
         <button
           key={id}

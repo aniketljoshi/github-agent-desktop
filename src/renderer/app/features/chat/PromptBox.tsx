@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
-import { Send, Square } from 'lucide-react'
+import { ArrowUp, Paperclip, Square } from 'lucide-react'
 import { useModelsStore } from '../../store/models'
 import { useSessionStore } from '../../store/session'
+import { useWorkspaceStore } from '../../store/workspace'
+import { ModelPicker } from '../models/ModelPicker'
+import { ModeDropdown } from '../modes/ModeDropdown'
 
 const PLACEHOLDERS: Record<string, string> = {
   ask: 'Ask about the repo, architecture, or implementation details...',
@@ -21,6 +24,7 @@ export function PromptBox() {
     abortCurrent
   } = useSessionStore()
   const { selectedModels } = useModelsStore()
+  const { workspace, selectWorkspace } = useWorkspaceStore()
   const [input, setInput] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -78,28 +82,44 @@ export function PromptBox() {
           disabled={isStreaming}
         />
 
-        {isStreaming ? (
-          <button
-            onClick={abortCurrent}
-            className="prompt-action prompt-action--danger"
-            title="Stop"
-          >
-            <Square size={14} />
-          </button>
-        ) : (
-          <button
-            onClick={() => void handleSend()}
-            disabled={!input.trim() || !selectedModels[mode]}
-            className="prompt-action prompt-action--primary"
-            title="Send (Ctrl+Enter)"
-          >
-            <Send size={14} />
-          </button>
-        )}
+        <div className="prompt-toolbar prompt-toolbar--bottom">
+          <div className="prompt-toolbar-left">
+            <button
+              onClick={() => void selectWorkspace()}
+              className="prompt-tool-button"
+              title={workspace ? 'Change attached workspace' : 'Attach workspace'}
+            >
+              <Paperclip size={14} />
+              <span>{workspace ? workspace.repoName : 'Attach context'}</span>
+            </button>
+
+            <ModeDropdown />
+            <ModelPicker compact />
+          </div>
+
+          {isStreaming ? (
+            <button
+              onClick={abortCurrent}
+              className="prompt-action prompt-action--danger"
+              title="Stop"
+            >
+              <Square size={14} />
+            </button>
+          ) : (
+            <button
+              onClick={() => void handleSend()}
+              disabled={!input.trim() || !selectedModels[mode]}
+              className="prompt-action prompt-action--primary"
+              title="Send (Ctrl+Enter)"
+            >
+              <ArrowUp size={14} />
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="prompt-footnote">
-        <span>{mode === 'ask' ? 'Ask mode' : mode === 'plan' ? 'Plan mode' : 'Agent mode'}</span>
+        <span>{selectedModels[mode] ? 'Model ready' : 'Choose a model to start'}</span>
         <span>Ctrl+Enter to send</span>
       </div>
     </div>
