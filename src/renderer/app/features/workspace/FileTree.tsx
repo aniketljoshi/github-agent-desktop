@@ -40,11 +40,7 @@ function TreeItem({
 
   return (
     <div>
-      <button
-        onClick={toggle}
-        className="flex w-full items-center gap-1 rounded px-1 py-0.5 text-xs hover:bg-bg-hover"
-        style={{ paddingLeft: depth * 12 + 4 }}
-      >
+      <button onClick={toggle} className="file-tree-item" style={{ paddingLeft: depth * 12 + 4 }}>
         {node.isDir ? (
           expanded ? (
             <ChevronDown size={12} className="text-text-muted" />
@@ -55,11 +51,11 @@ function TreeItem({
           <span className="w-3" />
         )}
         {node.isDir ? (
-          <Folder size={12} className="text-accent" />
+          <Folder size={12} className="file-tree-icon is-folder" />
         ) : (
-          <File size={12} className="text-text-muted" />
+          <File size={12} className="file-tree-icon" />
         )}
-        <span className="truncate text-text-secondary">{displayName}</span>
+        <span className="file-tree-name">{displayName}</span>
       </button>
       {expanded &&
         children.map((child) => (
@@ -73,7 +69,7 @@ export function FileTree() {
   const { files, workspace, listDir } = useWorkspaceStore()
 
   if (!workspace) {
-    return <p className="px-3 py-1 text-xs text-text-muted">No workspace selected</p>
+    return <p className="sidebar-empty">No workspace selected</p>
   }
 
   const rootNodes: TreeNode[] = files.map((name) => ({
@@ -83,7 +79,7 @@ export function FileTree() {
   }))
 
   return (
-    <div className="flex flex-col gap-0.5">
+    <div className="file-tree-shell">
       {rootNodes.map((node) => (
         <TreeItem key={node.name} node={node} depth={0} onExpand={listDir} />
       ))}

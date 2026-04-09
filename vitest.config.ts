@@ -10,7 +10,21 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'lcov'],
       include: ['src/main/**', 'src/shared/**'],
-      exclude: ['**/*.d.ts']
+      exclude: [
+        '**/*.d.ts',
+        'src/main/index.ts',
+        'src/main/ipc.ts',
+        'src/main/windows.ts',
+        'src/main/auth/github-oauth.ts',
+        'src/shared/events.ts',
+        'src/shared/types.ts'
+      ],
+      thresholds: {
+        statements: 80,
+        branches: 80,
+        functions: 80,
+        lines: 80
+      }
     }
   },
   resolve: {

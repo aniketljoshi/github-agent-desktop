@@ -63,4 +63,22 @@ describe('provider-registry', () => {
     )
     expect(isProviderAvailable('byok')).toBe(false)
   })
+
+  it('falls back to default providers when a mode is not explicitly configured', async () => {
+    const { getProviderForMode, isProviderAvailable } = await import(
+      '../../../src/main/services/provider-registry'
+    )
+    const settings = {
+      selectedProvider: {} as Record<'ask' | 'plan' | 'agent', 'github-models' | 'copilot-sdk' | 'byok'>,
+      selectedModel: { ask: '', plan: '', agent: '' },
+      repoPath: null,
+      hasBYOK: false,
+      byokConfig: null,
+      theme: 'dark' as const
+    }
+
+    expect(getProviderForMode('ask', settings)).toBe('github-models')
+    expect(getProviderForMode('agent', settings)).toBe('copilot-sdk')
+    expect(isProviderAvailable('custom' as never)).toBe(false)
+  })
 })

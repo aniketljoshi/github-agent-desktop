@@ -56,4 +56,28 @@ describe('model catalog', () => {
     const catalog = await fetchModelCatalog('token')
     expect(catalog).toEqual([])
   })
+
+  it('returns cached results within the TTL and fills default values for sparse models', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => [{ id: 'model-x' }]
+    })
+
+    const { fetchModelCatalog } = await import('../../../src/main/github/models')
+    const first = await fetchModelCatalog('token')
+    const second = await fetchModelCatalog('token')
+
+    expect(first[0]).toEqual({
+      id: 'model-x',
+      name: 'model-x',
+      publisher: 'Unknown',
+      capabilities: [],
+      limits: {},
+      rateLimitTier: 'default',
+      supportedInputModalities: ['text'],
+      tags: []
+    })
+    expect(second).toEqual(first)
+    expect(mockFetch).toHaveBeenCalledTimes(1)
+  })
 })

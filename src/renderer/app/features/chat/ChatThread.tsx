@@ -42,10 +42,10 @@ export function ChatThread() {
           <Bot size={18} />
           <span>Ask mode</span>
         </div>
-        <h2>Start with a question, a repo task, or a decision to make.</h2>
+        <h2>Start with a repo question, a change request, or a decision to make.</h2>
         <p>
-          Keep the main thread focused. Plans, tool calls, and approvals stay in dedicated surfaces
-          around the workspace.
+          Keep the conversation clean while plans, tool calls, approvals, and logs stay in their own
+          surfaces around the workspace.
         </p>
       </div>
     )

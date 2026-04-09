@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
-import { Send, Square } from 'lucide-react'
+import { ArrowUp, Paperclip, Square } from 'lucide-react'
 import { useModelsStore } from '../../store/models'
 import { useSessionStore } from '../../store/session'
+import { useWorkspaceStore } from '../../store/workspace'
+import { ModelPicker } from '../models/ModelPicker'
+import { ModeTabs } from '../modes/ModeTabs'
 
 const PLACEHOLDERS: Record<string, string> = {
   ask: 'Ask about the repo, architecture, or implementation details...',
@@ -21,6 +24,7 @@ export function PromptBox() {
     abortCurrent
   } = useSessionStore()
   const { selectedModels } = useModelsStore()
+  const { workspace, selectWorkspace } = useWorkspaceStore()
   const [input, setInput] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -67,6 +71,23 @@ export function PromptBox() {
   return (
     <div className="prompt-shell">
       <div className="prompt-compose">
+        <div className="prompt-toolbar">
+          <div className="prompt-toolbar-left">
+            <button
+              onClick={() => void selectWorkspace()}
+              className="prompt-tool-button"
+              title={workspace ? 'Change attached workspace' : 'Attach workspace'}
+            >
+              <Paperclip size={14} />
+              <span>{workspace ? workspace.repoName : 'Attach context'}</span>
+            </button>
+
+            <ModelPicker compact />
+          </div>
+
+          <ModeTabs compact />
+        </div>
+
         <textarea
           ref={textareaRef}
           value={input}
@@ -93,13 +114,13 @@ export function PromptBox() {
             className="prompt-action prompt-action--primary"
             title="Send (Ctrl+Enter)"
           >
-            <Send size={14} />
+            <ArrowUp size={14} />
           </button>
         )}
       </div>
 
       <div className="prompt-footnote">
-        <span>{mode === 'ask' ? 'Ask mode' : mode === 'plan' ? 'Plan mode' : 'Agent mode'}</span>
+        <span>{workspace ? `${workspace.repoName} attached` : 'No workspace attached'}</span>
         <span>Ctrl+Enter to send</span>
       </div>
     </div>

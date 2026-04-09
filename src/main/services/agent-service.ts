@@ -102,7 +102,7 @@ export async function listAgentSessions(): Promise<AgentSessionSummary[]> {
   if (!adapter.isAvailable()) return []
   try {
     await ensureSDK()
-    return adapter.listSessions()
+    return await adapter.listSessions()
   } catch {
     return []
   }

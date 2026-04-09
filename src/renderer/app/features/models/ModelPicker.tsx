@@ -4,7 +4,7 @@ import { useModelsStore } from '../../store/models'
 import { useSessionStore } from '../../store/session'
 import type { ModelCatalogEntry } from '../../../../shared/types'
 
-export function ModelPicker() {
+export function ModelPicker({ compact = false }: { compact?: boolean }) {
   const { catalog, selectedModels, fetchCatalog, selectModel, getGroupedModels } = useModelsStore()
   const { mode } = useSessionStore()
   const [open, setOpen] = useState(false)
@@ -51,7 +51,10 @@ export function ModelPicker() {
 
   return (
     <div ref={ref} className="model-picker-shell no-drag">
-      <button onClick={() => setOpen((value) => !value)} className="model-picker-trigger">
+      <button
+        onClick={() => setOpen((value) => !value)}
+        className={`model-picker-trigger ${compact ? 'is-compact' : ''}`}
+      >
         <Zap size={12} className="text-accent" />
         <span className="model-picker-trigger-label">{currentModel?.name ?? 'Select model'}</span>
         <ChevronDown size={12} />
