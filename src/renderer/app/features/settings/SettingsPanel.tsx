@@ -1,9 +1,11 @@
 import { useEffect } from 'react'
-import { X, Settings } from 'lucide-react'
+import { LogOut, Settings, Shield, UserRound, X } from 'lucide-react'
+import { useAuthStore } from '../../store/auth'
 import { useUIStore } from '../../store/ui'
 
 export function SettingsPanel() {
   const { closeSettings } = useUIStore()
+  const { user, authMethod, logout } = useAuthStore()
 
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
@@ -31,6 +33,60 @@ export function SettingsPanel() {
 
         <div className="settings-body">
           <section className="settings-section">
+            <h3 className="settings-heading">Account</h3>
+            {user ? (
+              <div className="settings-account-card">
+                <div className="settings-account-profile">
+                  <img
+                    src={user.avatarUrl}
+                    alt={user.username}
+                    className="settings-account-avatar"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="settings-account-copy">
+                    <strong>{user.username}</strong>
+                    <span>Signed in with GitHub</span>
+                  </div>
+                </div>
+
+                <div className="settings-account-meta">
+                  <span className="settings-account-method">
+                    <Shield size={12} />
+                    {authMethod === 'oauth'
+                      ? 'Browser OAuth'
+                      : authMethod === 'device-flow'
+                        ? 'Device code'
+                        : 'Personal access token'}
+                  </span>
+
+                  <button
+                    onClick={() => {
+                      void logout()
+                      closeSettings()
+                    }}
+                    className="settings-logout-button"
+                  >
+                    <LogOut size={14} />
+                    Logout
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="settings-account-card">
+                <div className="settings-account-profile">
+                  <span className="settings-account-avatar settings-account-avatar--placeholder">
+                    <UserRound size={16} />
+                  </span>
+                  <div className="settings-account-copy">
+                    <strong>No signed-in account</strong>
+                    <span>Sign in again to browse models and run Ask, Plan, or Agent.</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </section>
+
+          <section className="settings-section">
             <h3 className="settings-heading">Appearance</h3>
             <p className="settings-copy">
               Dark theme is the default in this build. Additional themes can land once the core
@@ -41,8 +97,8 @@ export function SettingsPanel() {
           <section className="settings-section">
             <h3 className="settings-heading">Provider fallback</h3>
             <p className="settings-copy">
-              Bring-your-own-key support is planned, but it is intentionally hidden in this build
-              until provider routing and model selection are fully wired.
+              GitHub remains the primary provider. The model dropdown only shows what your current
+              GitHub access can use, and Agent mode narrows that further to tool-capable models.
             </p>
           </section>
 
@@ -79,7 +135,8 @@ export function SettingsPanel() {
           <section className="settings-section">
             <h3 className="settings-heading">About</h3>
             <p className="settings-copy">
-              GitHub Agent Desktop v0.1.0 - An unofficial GitHub-native desktop coding agent.
+              GitHub Agent Desktop v0.1.0 - An unofficial GitHub-native desktop coding agent with
+              Ask, Plan, and Agent workflows.
             </p>
           </section>
         </div>

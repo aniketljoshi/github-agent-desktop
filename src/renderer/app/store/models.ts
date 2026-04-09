@@ -1,5 +1,13 @@
 import { create } from 'zustand'
-import type { ModelCatalogEntry, Mode } from '../../../shared/types'
+import type { ModelCatalogEntry, Mode, UserSettings } from '../../../shared/types'
+
+function filterModelsForMode(catalog: ModelCatalogEntry[], mode: Mode): ModelCatalogEntry[] {
+  if (mode === 'agent') {
+    return catalog.filter((model) => model.capabilities.includes('tool-calling'))
+  }
+
+  return catalog
+}
 
 interface ModelsState {
   catalog: ModelCatalogEntry[]
@@ -7,7 +15,8 @@ interface ModelsState {
   isLoading: boolean
   fetchCatalog: () => Promise<void>
   selectModel: (mode: Mode, modelId: string) => void
-  getGroupedModels: () => Record<string, ModelCatalogEntry[]>
+  getModelsForMode: (mode: Mode) => ModelCatalogEntry[]
+  getGroupedModels: (mode: Mode) => Record<string, ModelCatalogEntry[]>
 }
 
 export const useModelsStore = create<ModelsState>((set, get) => ({
@@ -18,8 +27,30 @@ export const useModelsStore = create<ModelsState>((set, get) => ({
   fetchCatalog: async () => {
     set({ isLoading: true })
     try {
-      const catalog = (await window.api['models:catalog']()) as ModelCatalogEntry[]
-      set({ catalog, isLoading: false })
+      const [catalog, settings] = (await Promise.all([
+        window.api['models:catalog'](),
+        window.api['settings:get']()
+      ])) as [ModelCatalogEntry[], UserSettings]
+
+      const nextSelected: Record<Mode, string> = {
+        ask: get().selectedModels.ask || settings.selectedModel.ask || '',
+        plan: get().selectedModels.plan || settings.selectedModel.plan || '',
+        agent: get().selectedModels.agent || settings.selectedModel.agent || ''
+      }
+
+      ;(['ask', 'plan', 'agent'] as const).forEach((mode) => {
+        const modeModels = filterModelsForMode(catalog, mode)
+        const hasCurrentSelection = modeModels.some((model) => model.id === nextSelected[mode])
+
+        if (!hasCurrentSelection) {
+          nextSelected[mode] = modeModels[0]?.id ?? ''
+          if (nextSelected[mode]) {
+            window.api['models:select']({ mode, modelId: nextSelected[mode] })
+          }
+        }
+      })
+
+      set({ catalog, selectedModels: nextSelected, isLoading: false })
     } catch {
       set({ isLoading: false })
     }
@@ -31,9 +62,13 @@ export const useModelsStore = create<ModelsState>((set, get) => ({
     window.api['models:select']({ mode, modelId })
   },
 
-  getGroupedModels: () => {
+  getModelsForMode: (mode) => {
+    return filterModelsForMode(get().catalog, mode)
+  },
+
+  getGroupedModels: (mode) => {
     const groups: Record<string, ModelCatalogEntry[]> = {}
-    for (const m of get().catalog) {
+    for (const m of filterModelsForMode(get().catalog, mode)) {
       const key = m.publisher
       if (!groups[key]) groups[key] = []
       groups[key].push(m)
