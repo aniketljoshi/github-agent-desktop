@@ -73,12 +73,12 @@ export function createMainWindow(): BrowserWindow {
   const rendererEntry = join(app.getAppPath(), 'out/renderer/index.html')
 
   if (isDev && process.env.ELECTRON_RENDERER_URL) {
-    void mainWindow.loadURL(process.env.ELECTRON_RENDERER_URL).catch(error => {
+    void mainWindow.loadURL(process.env.ELECTRON_RENDERER_URL).catch((error) => {
       logStartup(`main window loadURL failed: ${process.env.ELECTRON_RENDERER_URL}`, error)
     })
   } else {
     logStartup(`main window loading file: ${rendererEntry}`)
-    void mainWindow.loadFile(rendererEntry).catch(error => {
+    void mainWindow.loadFile(rendererEntry).catch((error) => {
       logStartup(`main window loadFile failed: ${rendererEntry}`, error)
     })
   }

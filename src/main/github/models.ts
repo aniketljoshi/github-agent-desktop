@@ -14,7 +14,10 @@ export async function fetchModelCatalog(token: string): Promise<ModelCatalogEntr
 }
 
 export async function fetchAccessibleModelCatalog(token: string): Promise<ModelCatalogEntry[]> {
-  const copilotModels = await withTimeout(fetchCopilotAccessibleModels(token), COPILOT_FETCH_TIMEOUT_MS)
+  const copilotModels = await withTimeout(
+    fetchCopilotAccessibleModels(token),
+    COPILOT_FETCH_TIMEOUT_MS
+  )
   if (copilotModels.length > 0) {
     cachedCatalog = copilotModels
     cachedAt = Date.now()
@@ -112,7 +115,7 @@ async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T
   try {
     return await Promise.race([
       promise,
-      new Promise<[]>(resolve => {
+      new Promise<[]>((resolve) => {
         timer = setTimeout(() => resolve([]), timeoutMs)
       })
     ])

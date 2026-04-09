@@ -79,9 +79,9 @@ export function ModelPicker({ compact = false }: { compact?: boolean }) {
                   ? 'Loading...'
                   : error
                     ? 'Copilot models unavailable'
-                  : mode === 'agent'
-                    ? 'Tool-capable only'
-                    : `${availableModels.length} models`}
+                    : mode === 'agent'
+                      ? 'Tool-capable only'
+                      : `${availableModels.length} models`}
               </span>
             </div>
             <div className="model-picker-search">
@@ -156,9 +156,9 @@ export function ModelPicker({ compact = false }: { compact?: boolean }) {
                   ? 'Loading models...'
                   : error
                     ? error
-                  : mode === 'agent'
-                    ? 'No tool-capable models are available to this account.'
-                    : 'No models found'}
+                    : mode === 'agent'
+                      ? 'No tool-capable models are available to this account.'
+                      : 'No models found'}
               </p>
             )}
           </div>

@@ -81,10 +81,10 @@ app.on('render-process-gone', (_event, webContents, details) => {
   logStartup(`render-process-gone for ${webContents.id}: ${details.reason}`)
 })
 
-process.on('uncaughtException', error => {
+process.on('uncaughtException', (error) => {
   logStartup('uncaughtException', error)
 })
 
-process.on('unhandledRejection', reason => {
+process.on('unhandledRejection', (reason) => {
   logStartup('unhandledRejection', reason)
 })
