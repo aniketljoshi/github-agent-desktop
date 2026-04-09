@@ -47,9 +47,17 @@ import * as workspace from './workspace/workspace'
 import { settingsStore } from './services/settings-store'
 import { focusMainWindow } from './windows'
 
-const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID ?? ''
-const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET ?? ''
-const GITHUB_CALLBACK_URL = process.env.GITHUB_CALLBACK_URL ?? 'http://127.0.0.1:48163/callback'
+function getGitHubOAuthConfig(): {
+  clientId: string
+  clientSecret: string
+  callbackUrl: string
+} {
+  return {
+    clientId: process.env.GITHUB_CLIENT_ID?.trim() ?? '',
+    clientSecret: process.env.GITHUB_CLIENT_SECRET?.trim() ?? '',
+    callbackUrl: process.env.GITHUB_CALLBACK_URL?.trim() || 'http://127.0.0.1:48163/callback'
+  }
+}
 
 function validated<T>(schema: ZodSchema, handler: (args: T) => unknown | Promise<unknown>) {
   return async (_event: Electron.IpcMainInvokeEvent, rawArgs: unknown) => {
@@ -68,10 +76,11 @@ export function registerAllHandlers(): void {
   ipcMain.handle(
     AUTH_LOGIN_OAUTH,
     validated(ipcSchemas['auth:login-oauth'], async () => {
+      const { clientId, clientSecret, callbackUrl } = getGitHubOAuthConfig()
       const token = await authService.startOAuthFlow(
-        GITHUB_CLIENT_ID,
-        GITHUB_CLIENT_SECRET,
-        GITHUB_CALLBACK_URL
+        clientId,
+        clientSecret,
+        callbackUrl
       )
       focusMainWindow()
       const user = await validatePAT(token)
@@ -85,7 +94,8 @@ export function registerAllHandlers(): void {
     AUTH_LOGIN_DEVICE,
     validated(ipcSchemas['auth:login-device'], async () => {
       const { getMainWindow } = await import('./windows')
-      const token = await authService.startDeviceFlow(GITHUB_CLIENT_ID, (code, uri) => {
+      const { clientId } = getGitHubOAuthConfig()
+      const token = await authService.startDeviceFlow(clientId, (code, uri) => {
         getMainWindow()?.webContents.send('auth:device-code', { code, uri })
       })
       focusMainWindow()
