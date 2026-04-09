@@ -21,10 +21,7 @@ export function UserChip() {
 
   return (
     <div ref={ref} className="user-chip-shell no-drag">
-      <button
-        onClick={() => setOpen(!open)}
-        className="user-chip-trigger"
-      >
+      <button onClick={() => setOpen(!open)} className="user-chip-trigger">
         <img
           src={user.avatarUrl}
           alt={user.username}

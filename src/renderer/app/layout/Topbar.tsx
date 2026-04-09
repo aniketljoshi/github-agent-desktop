@@ -10,11 +10,7 @@ export function Topbar() {
 
   return (
     <header className="drag-region topbar-shell">
-      <button
-        onClick={toggleSidebar}
-        className="topbar-icon-button no-drag"
-        title="Toggle sidebar"
-      >
+      <button onClick={toggleSidebar} className="topbar-icon-button no-drag" title="Toggle sidebar">
         <PanelLeft size={16} />
       </button>
 
@@ -36,19 +32,11 @@ export function Topbar() {
       </div>
 
       <div className="topbar-actions no-drag">
-        <button
-          onClick={toggleBottomPanel}
-          className="topbar-icon-button"
-          title="Toggle terminal"
-        >
+        <button onClick={toggleBottomPanel} className="topbar-icon-button" title="Toggle terminal">
           <Terminal size={16} />
         </button>
 
-        <button
-          onClick={toggleInspector}
-          className="topbar-icon-button"
-          title="Toggle inspector"
-        >
+        <button onClick={toggleInspector} className="topbar-icon-button" title="Toggle inspector">
           <PanelRight size={16} />
         </button>
 

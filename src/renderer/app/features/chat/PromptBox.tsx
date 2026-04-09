@@ -79,7 +79,11 @@ export function PromptBox() {
         />
 
         {isStreaming ? (
-          <button onClick={abortCurrent} className="prompt-action prompt-action--danger" title="Stop">
+          <button
+            onClick={abortCurrent}
+            className="prompt-action prompt-action--danger"
+            title="Stop"
+          >
             <Square size={14} />
           </button>
         ) : (

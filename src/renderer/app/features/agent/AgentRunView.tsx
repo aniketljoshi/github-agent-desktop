@@ -64,7 +64,10 @@ export function AgentRunView() {
         if (item.type === 'message') {
           const isUser = item.msg.role === 'user'
           return (
-            <div key={`msg-${index}`} className={`agent-message ${isUser ? 'is-user' : 'is-assistant'}`}>
+            <div
+              key={`msg-${index}`}
+              className={`agent-message ${isUser ? 'is-user' : 'is-assistant'}`}
+            >
               <div className={`agent-message-avatar ${isUser ? 'is-user' : 'is-assistant'}`}>
                 {isUser ? <User size={14} /> : <Bot size={14} />}
               </div>

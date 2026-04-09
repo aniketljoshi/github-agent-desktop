@@ -29,9 +29,7 @@ export function BottomPanel() {
       <div className="bottom-body">
         {bottomPanelTab === 'terminal' && <TerminalPanel />}
         {bottomPanelTab === 'diff' && <p className="bottom-empty">No diff to display.</p>}
-        {bottomPanelTab === 'diagnostics' && (
-          <p className="bottom-empty">No diagnostics.</p>
-        )}
+        {bottomPanelTab === 'diagnostics' && <p className="bottom-empty">No diagnostics.</p>}
       </div>
     </div>
   )

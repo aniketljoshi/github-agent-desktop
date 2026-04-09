@@ -58,8 +58,8 @@ export function PlanView() {
         <div className="plan-empty-copy">
           <h2>Turn a rough goal into a concrete execution path.</h2>
           <p>
-            Plan mode breaks the task into ordered steps, touched files, and risk so you can hand
-            it to Agent with intent.
+            Plan mode breaks the task into ordered steps, touched files, and risk so you can hand it
+            to Agent with intent.
           </p>
         </div>
       </div>

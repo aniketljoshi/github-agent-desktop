@@ -461,7 +461,9 @@ pre {
   gap: 12px;
   padding: 10px 16px;
   color: rgba(255, 255, 255, 0.72);
-  transition: background-color 140ms ease, color 140ms ease;
+  transition:
+    background-color 140ms ease,
+    color 140ms ease;
 }
 
 .model-picker-option:hover {
@@ -1642,8 +1644,7 @@ pre {
   padding: 30px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 32px;
-  background:
-    linear-gradient(180deg, rgba(19, 22, 28, 0.98), rgba(11, 13, 18, 0.98));
+  background: linear-gradient(180deg, rgba(19, 22, 28, 0.98), rgba(11, 13, 18, 0.98));
   box-shadow:
     0 40px 100px rgba(0, 0, 0, 0.48),
     inset 0 1px 0 rgba(255, 255, 255, 0.04);
@@ -1806,8 +1807,7 @@ pre {
 }
 
 .auth-preview-card--timeline {
-  background:
-    linear-gradient(180deg, rgba(45, 61, 112, 0.22), rgba(255, 255, 255, 0.03));
+  background: linear-gradient(180deg, rgba(45, 61, 112, 0.22), rgba(255, 255, 255, 0.03));
 }
 
 .auth-preview-card-label {

@@ -129,7 +129,9 @@ async function waitForOAuthCode(callbackUrl: string, expectedState: string): Pro
         if (error) {
           res.statusCode = 400
           res.setHeader('Content-Type', 'text/html; charset=utf-8')
-          res.end('<html><body><h1>GitHub login failed</h1><p>You can close this window.</p></body></html>')
+          res.end(
+            '<html><body><h1>GitHub login failed</h1><p>You can close this window.</p></body></html>'
+          )
           clearTimeout(timeout)
           server.close()
           reject(new Error(`GitHub login failed: ${error}`))
@@ -139,7 +141,9 @@ async function waitForOAuthCode(callbackUrl: string, expectedState: string): Pro
         if (returnedState !== expectedState || !code) {
           res.statusCode = 400
           res.setHeader('Content-Type', 'text/html; charset=utf-8')
-          res.end('<html><body><h1>Invalid login response</h1><p>You can close this window.</p></body></html>')
+          res.end(
+            '<html><body><h1>Invalid login response</h1><p>You can close this window.</p></body></html>'
+          )
           clearTimeout(timeout)
           server.close()
           reject(new Error('Invalid GitHub login response'))

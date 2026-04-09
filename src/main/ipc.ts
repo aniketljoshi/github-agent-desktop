@@ -77,11 +77,7 @@ export function registerAllHandlers(): void {
     AUTH_LOGIN_OAUTH,
     validated(ipcSchemas['auth:login-oauth'], async () => {
       const { clientId, clientSecret, callbackUrl } = getGitHubOAuthConfig()
-      const token = await authService.startOAuthFlow(
-        clientId,
-        clientSecret,
-        callbackUrl
-      )
+      const token = await authService.startOAuthFlow(clientId, clientSecret, callbackUrl)
       focusMainWindow()
       const user = await validatePAT(token)
       storeToken('github', token)

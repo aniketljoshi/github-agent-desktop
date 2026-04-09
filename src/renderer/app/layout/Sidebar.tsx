@@ -17,15 +17,10 @@ export function Sidebar() {
           Sessions
         </div>
         <div className="sidebar-list">
-          {agentSessions.length === 0 && (
-            <p className="sidebar-empty">No sessions yet</p>
-          )}
+          {agentSessions.length === 0 && <p className="sidebar-empty">No sessions yet</p>}
           {agentSessions.map((s) => (
             <div key={s.sessionId} className="sidebar-item group">
-              <button
-                onClick={() => resumeSession(s.sessionId)}
-                className="sidebar-item-main"
-              >
+              <button onClick={() => resumeSession(s.sessionId)} className="sidebar-item-main">
                 {s.summary || 'Untitled session'}
               </button>
               <button

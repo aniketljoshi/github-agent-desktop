@@ -11,6 +11,10 @@ import {
 
 const tempDirectories: string[] = []
 
+function normalizePathSeparators(value: string): string {
+  return value.replace(/\\/g, '/')
+}
+
 function createTempDirectory(): string {
   const directory = mkdtempSync(join(tmpdir(), 'gh-agent-runtime-config-'))
   tempDirectories.push(directory)
@@ -50,7 +54,7 @@ describe('getRuntimeEnvFileCandidates', () => {
       execPath: 'C:\\repo\\app.exe'
     })
 
-    expect(candidates).toEqual(['C:\\repo\\.env', 'C:\\repo\\.env.local'])
+    expect(candidates.map(normalizePathSeparators)).toEqual(['C:/repo/.env', 'C:/repo/.env.local'])
   })
 
   it('includes resources, executable directory, and userData in packaged mode', () => {
@@ -62,9 +66,11 @@ describe('getRuntimeEnvFileCandidates', () => {
       userDataPath: 'C:\\Users\\user\\AppData\\Roaming\\GitHub Agent Desktop'
     })
 
-    expect(candidates).toContain('C:\\Program Files\\GitHub Agent Desktop\\resources\\.env')
-    expect(candidates).toContain('C:\\Program Files\\GitHub Agent Desktop\\.env.local')
-    expect(candidates).toContain('C:\\Users\\user\\AppData\\Roaming\\GitHub Agent Desktop\\.env')
+    const normalizedCandidates = candidates.map(normalizePathSeparators)
+
+    expect(normalizedCandidates).toContain('C:/Program Files/GitHub Agent Desktop/resources/.env')
+    expect(normalizedCandidates).toContain('C:/Program Files/GitHub Agent Desktop/.env.local')
+    expect(normalizedCandidates).toContain('C:/Users/user/AppData/Roaming/GitHub Agent Desktop/.env')
   })
 })
 
