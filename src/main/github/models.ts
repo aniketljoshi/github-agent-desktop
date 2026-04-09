@@ -14,9 +14,6 @@ export async function fetchModelCatalog(token: string): Promise<ModelCatalogEntr
 }
 
 export async function fetchAccessibleModelCatalog(token: string): Promise<ModelCatalogEntry[]> {
-  const rawCatalogPromise = fetchModelCatalog(token)
-    .then(catalog => ({ catalog, error: null as Error | null }))
-    .catch(error => ({ catalog: [] as ModelCatalogEntry[], error: error as Error }))
   const copilotModels = await withTimeout(fetchCopilotAccessibleModels(token), COPILOT_FETCH_TIMEOUT_MS)
   if (copilotModels.length > 0) {
     cachedCatalog = copilotModels
@@ -24,12 +21,7 @@ export async function fetchAccessibleModelCatalog(token: string): Promise<ModelC
     return copilotModels
   }
 
-  const rawCatalogResult = await rawCatalogPromise
-  if (rawCatalogResult.error) {
-    throw rawCatalogResult.error
-  }
-
-  return rawCatalogResult.catalog
+  throw new Error('Could not load organization-assigned Copilot models')
 }
 
 export async function refreshCatalog(token: string): Promise<ModelCatalogEntry[]> {

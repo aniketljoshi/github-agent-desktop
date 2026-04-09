@@ -217,86 +217,47 @@ describe('model catalog', () => {
     ])
   })
 
-  it('falls back to the GitHub Models catalog when the SDK cannot provide models', async () => {
+  it('throws when the SDK cannot provide Copilot-accessible models', async () => {
     adapterMock.loadSDK.mockResolvedValue(false)
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => [
-        {
-          id: 'gpt-4.1',
-          name: 'GPT-4.1',
-          publisher: 'OpenAI',
-          capabilities: ['streaming', 'tool-calling'],
-          limits: { max_tokens: 4096 },
-          rate_limit_tier: 'standard',
-          supported_input_modalities: ['text'],
-          tags: []
-        }
-      ]
-    })
 
     const { fetchAccessibleModelCatalog } = await import('../../../src/main/github/models')
-    const catalog = await fetchAccessibleModelCatalog('token')
-
-    expect(catalog[0]?.source).toBe('github-models')
-    expect(mockFetch).toHaveBeenCalledTimes(1)
+    await expect(fetchAccessibleModelCatalog('token')).rejects.toThrow(
+      'Could not load organization-assigned Copilot models'
+    )
+    expect(mockFetch).not.toHaveBeenCalled()
   })
 
-  it('falls back to the GitHub Models catalog when the SDK loads but returns no models', async () => {
+  it('throws when the SDK loads but returns no models', async () => {
     adapterMock.loadSDK.mockResolvedValue(true)
     adapterMock.initClient.mockResolvedValue(undefined)
     adapterMock.listModels.mockResolvedValue([])
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => []
-    })
 
     const { fetchAccessibleModelCatalog } = await import('../../../src/main/github/models')
-    const catalog = await fetchAccessibleModelCatalog('token')
-
+    await expect(fetchAccessibleModelCatalog('token')).rejects.toThrow(
+      'Could not load organization-assigned Copilot models'
+    )
     expect(adapterMock.initClient).toHaveBeenCalledWith('token')
-    expect(catalog).toEqual([])
-    expect(mockFetch).toHaveBeenCalledTimes(1)
+    expect(mockFetch).not.toHaveBeenCalled()
   })
 
-  it('falls back to the GitHub Models catalog when the SDK model lookup stalls', async () => {
+  it('throws when the SDK model lookup stalls', async () => {
     vi.useFakeTimers()
     adapterMock.loadSDK.mockResolvedValue(true)
     adapterMock.initClient.mockResolvedValue(undefined)
     adapterMock.listModels.mockImplementation(
       () => new Promise(() => undefined) as Promise<never[]>
     )
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => [
-        {
-          id: 'claude-opus-4.6',
-          name: 'Claude Opus 4.6',
-          publisher: 'Anthropic',
-          capabilities: ['streaming', 'tool-calling'],
-          limits: { max_tokens: 4096 },
-          rate_limit_tier: 'premium',
-          supported_input_modalities: ['text'],
-          tags: []
-        }
-      ]
-    })
 
     const { fetchAccessibleModelCatalog } = await import('../../../src/main/github/models')
-    const pending = fetchAccessibleModelCatalog('token')
+    const pending = fetchAccessibleModelCatalog('token').catch((error: unknown) => error)
 
     await vi.advanceTimersByTimeAsync(4000)
 
-    const catalog = await pending
+    const error = await pending
 
-    expect(catalog).toEqual([
-      expect.objectContaining({
-        id: 'claude-opus-4.6',
-        publisher: 'Anthropic',
-        source: 'github-models'
-      })
-    ])
-    expect(mockFetch).toHaveBeenCalledTimes(1)
+    expect(error).toBeInstanceOf(Error)
+    expect((error as Error).message).toBe('Could not load organization-assigned Copilot models')
+    expect(mockFetch).not.toHaveBeenCalled()
     vi.useRealTimers()
   })
 })

@@ -10,7 +10,7 @@ test.beforeAll(async () => {
 })
 
 test.afterAll(async () => {
-  await app.close()
+  await app?.close()
 })
 
 test('app launches and shows a window', async () => {

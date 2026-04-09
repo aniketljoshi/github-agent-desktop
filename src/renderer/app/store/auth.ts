@@ -14,6 +14,23 @@ interface AuthState {
   logout: () => Promise<void>
 }
 
+const AUTH_STATUS_TIMEOUT_MS = 10000
+
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number, message: string): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(message)), timeoutMs)
+    promise
+      .then((value) => {
+        clearTimeout(timer)
+        resolve(value)
+      })
+      .catch((error) => {
+        clearTimeout(timer)
+        reject(error)
+      })
+  })
+}
+
 export const useAuthStore = create<AuthState>((set) => ({
   isAuthenticated: false,
   user: null,
@@ -24,15 +41,29 @@ export const useAuthStore = create<AuthState>((set) => ({
   checkStatus: async () => {
     set({ isLoading: true, error: null })
     try {
-      const status = await window.api['auth:status']()
+      const status = await withTimeout(
+        window.api['auth:status']() as Promise<{
+          isAuthenticated: boolean
+          user: { username: string; avatarUrl: string } | null
+          authMethod: AuthMethod | null
+        }>,
+        AUTH_STATUS_TIMEOUT_MS,
+        'Sign-in check timed out'
+      )
       set({
         isAuthenticated: status.isAuthenticated,
         user: status.user,
         authMethod: status.authMethod,
         isLoading: false
       })
-    } catch {
-      set({ isAuthenticated: false, user: null, authMethod: null, isLoading: false })
+    } catch (err) {
+      set({
+        isAuthenticated: false,
+        user: null,
+        authMethod: null,
+        isLoading: false,
+        error: err instanceof Error ? err.message : 'Could not verify sign-in status'
+      })
     }
   },
 

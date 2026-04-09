@@ -10,7 +10,7 @@ test.beforeEach(async () => {
 })
 
 test.afterEach(async () => {
-  await app.close()
+  await app?.close()
 })
 
 test('PAT login shows error for invalid token', async () => {

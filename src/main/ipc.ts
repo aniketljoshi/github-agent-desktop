@@ -31,7 +31,7 @@ import {
   SETTINGS_CLEAR_BYOK
 } from '../shared/events'
 import * as authService from './auth/github-oauth'
-import { validatePAT } from './auth/pat-auth'
+import { fetchGitHubUser, validatePAT } from './auth/pat-auth'
 import {
   deleteToken,
   getAuthMethod,
@@ -79,7 +79,7 @@ export function registerAllHandlers(): void {
       const { clientId, clientSecret, callbackUrl } = getGitHubOAuthConfig()
       const token = await authService.startOAuthFlow(clientId, clientSecret, callbackUrl)
       focusMainWindow()
-      const user = await validatePAT(token)
+      const user = await fetchGitHubUser(token)
       storeToken('github', token)
       storeAuthMethod('github', 'oauth')
       return { success: true, user, authMethod: 'oauth' as const }
@@ -95,7 +95,7 @@ export function registerAllHandlers(): void {
         getMainWindow()?.webContents.send('auth:device-code', { code, uri })
       })
       focusMainWindow()
-      const user = await validatePAT(token)
+      const user = await fetchGitHubUser(token)
       storeToken('github', token)
       storeAuthMethod('github', 'device-flow')
       return { success: true, user, authMethod: 'device-flow' as const }
@@ -125,7 +125,7 @@ export function registerAllHandlers(): void {
       const token = getToken('github')
       if (!token) return { isAuthenticated: false, user: null, authMethod: null }
       try {
-        const user = await validatePAT(token)
+        const user = await fetchGitHubUser(token)
         return {
           isAuthenticated: true,
           user,

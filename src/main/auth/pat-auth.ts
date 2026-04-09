@@ -1,4 +1,6 @@
-export async function validatePAT(token: string): Promise<{ username: string; avatarUrl: string }> {
+export async function fetchGitHubUser(
+  token: string
+): Promise<{ username: string; avatarUrl: string }> {
   if (!token) throw new Error('Token is required')
 
   const res = await fetch('https://api.github.com/user', {
@@ -15,6 +17,12 @@ export async function validatePAT(token: string): Promise<{ username: string; av
 
   const data = (await res.json()) as { login: string; avatar_url: string }
 
+  return { username: data.login, avatarUrl: data.avatar_url }
+}
+
+export async function ensureGitHubModelsAccess(token: string): Promise<void> {
+  if (!token) throw new Error('Token is required')
+
   const modelsRes = await fetch('https://models.github.ai/catalog/models', {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -28,6 +36,10 @@ export async function validatePAT(token: string): Promise<{ username: string; av
       `Token does not have GitHub Models access (${modelsRes.status}: ${modelsRes.statusText})`
     )
   }
+}
 
-  return { username: data.login, avatarUrl: data.avatar_url }
+export async function validatePAT(token: string): Promise<{ username: string; avatarUrl: string }> {
+  const user = await fetchGitHubUser(token)
+  await ensureGitHubModelsAccess(token)
+  return user
 }

@@ -13,6 +13,7 @@ interface ModelsState {
   catalog: ModelCatalogEntry[]
   selectedModels: Record<Mode, string>
   isLoading: boolean
+  error: string | null
   fetchCatalog: () => Promise<void>
   selectModel: (mode: Mode, modelId: string) => void
   getModelsForMode: (mode: Mode) => ModelCatalogEntry[]
@@ -23,9 +24,10 @@ export const useModelsStore = create<ModelsState>((set, get) => ({
   catalog: [],
   selectedModels: { ask: '', plan: '', agent: '' },
   isLoading: false,
+  error: null,
 
   fetchCatalog: async () => {
-    set({ isLoading: true })
+    set({ isLoading: true, error: null })
     try {
       const [catalog, settings] = (await Promise.all([
         window.api['models:catalog'](),
@@ -50,9 +52,17 @@ export const useModelsStore = create<ModelsState>((set, get) => ({
         }
       })
 
-      set({ catalog, selectedModels: nextSelected, isLoading: false })
-    } catch {
-      set({ isLoading: false })
+      set({ catalog, selectedModels: nextSelected, isLoading: false, error: null })
+    } catch (error) {
+      set({
+        catalog: [],
+        selectedModels: { ask: '', plan: '', agent: '' },
+        isLoading: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Could not load organization-assigned Copilot models'
+      })
     }
   },
 

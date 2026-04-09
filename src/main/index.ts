@@ -2,8 +2,18 @@ import { app, BrowserWindow } from 'electron'
 import { createMainWindow } from './windows'
 import { applyRuntimeEnv } from './runtime-config'
 import { logStartup } from './startup-log'
+import { focusMainWindow } from './windows'
 
 logStartup('main module loaded')
+
+const isTestEnvironment = process.env.NODE_ENV === 'test'
+const hasSingleInstanceLock = isTestEnvironment ? true : app.requestSingleInstanceLock()
+
+if (!hasSingleInstanceLock) {
+  logStartup('second instance detected before startup lock; quitting')
+  app.quit()
+}
+
 applyRuntimeEnv({
   isPackaged: app.isPackaged,
   cwd: process.cwd(),
@@ -13,45 +23,54 @@ applyRuntimeEnv({
 })
 logStartup('initial runtime env applied')
 
-app.whenReady().then(async () => {
-  logStartup('app.whenReady resolved')
-  applyRuntimeEnv({
-    isPackaged: app.isPackaged,
-    cwd: process.cwd(),
-    execPath: process.execPath,
-    resourcesPath: process.resourcesPath,
-    userDataPath: app.getPath('userData'),
-    env: process.env
+if (!isTestEnvironment) {
+  app.on('second-instance', () => {
+    logStartup('second-instance event received')
+    focusMainWindow()
   })
-  logStartup('runtime env applied after whenReady')
+}
 
-  const win = createMainWindow()
-  logStartup('main window created')
+if (hasSingleInstanceLock) {
+  app.whenReady().then(async () => {
+    logStartup('app.whenReady resolved')
+    applyRuntimeEnv({
+      isPackaged: app.isPackaged,
+      cwd: process.cwd(),
+      execPath: process.execPath,
+      resourcesPath: process.resourcesPath,
+      userDataPath: app.getPath('userData'),
+      env: process.env
+    })
+    logStartup('runtime env applied after whenReady')
 
-  try {
-    logStartup('initializing IPC handlers')
-    const { registerAllHandlers } = await import('./ipc')
-    registerAllHandlers()
-    logStartup('IPC handlers initialized')
-  } catch (error) {
-    console.error('Failed to initialize IPC handlers', error)
-    logStartup('IPC handler initialization failed', error)
-  }
+    const win = createMainWindow()
+    logStartup('main window created')
 
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createMainWindow()
+    try {
+      logStartup('initializing IPC handlers')
+      const { registerAllHandlers } = await import('./ipc')
+      registerAllHandlers()
+      logStartup('IPC handlers initialized')
+    } catch (error) {
+      console.error('Failed to initialize IPC handlers', error)
+      logStartup('IPC handler initialization failed', error)
     }
-  })
 
-  win.webContents.on('will-navigate', (e, url) => {
-    if (!url.startsWith('http://127.0.0.1') && !url.startsWith('file://')) {
-      e.preventDefault()
-    }
-  })
+    app.on('activate', () => {
+      if (BrowserWindow.getAllWindows().length === 0) {
+        createMainWindow()
+      }
+    })
 
-  win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }))
-})
+    win.webContents.on('will-navigate', (e, url) => {
+      if (!url.startsWith('http://127.0.0.1') && !url.startsWith('file://')) {
+        e.preventDefault()
+      }
+    })
+
+    win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }))
+  })
+}
 
 app.on('window-all-closed', () => {
   logStartup('window-all-closed received')

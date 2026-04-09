@@ -11,7 +11,8 @@ export function ModelPicker({ compact = false }: { compact?: boolean }) {
     selectModel,
     getGroupedModels,
     getModelsForMode,
-    isLoading
+    isLoading,
+    error
   } = useModelsStore()
   const { mode } = useSessionStore()
   const [open, setOpen] = useState(false)
@@ -76,6 +77,8 @@ export function ModelPicker({ compact = false }: { compact?: boolean }) {
               <span className="model-picker-menu-meta">
                 {isLoading
                   ? 'Loading...'
+                  : error
+                    ? 'Copilot models unavailable'
                   : mode === 'agent'
                     ? 'Tool-capable only'
                     : `${availableModels.length} models`}
@@ -151,6 +154,8 @@ export function ModelPicker({ compact = false }: { compact?: boolean }) {
               <p className="model-picker-empty">
                 {isLoading
                   ? 'Loading models...'
+                  : error
+                    ? error
                   : mode === 'agent'
                     ? 'No tool-capable models are available to this account.'
                     : 'No models found'}
