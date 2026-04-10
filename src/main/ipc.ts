@@ -252,7 +252,7 @@ export function registerAllHandlers(): void {
   ipcMain.handle(
     WORKSPACE_SELECT,
     validated(ipcSchemas['workspace:select'], (args) =>
-      workspace.selectWorkspace((args as { path: string }).path)
+      workspace.selectWorkspace((args as { path?: string }).path)
     )
   )
 

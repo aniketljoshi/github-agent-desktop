@@ -18,7 +18,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set) => ({
   selectWorkspace: async () => {
     set({ isLoading: true })
     try {
-      const ws = (await window.api['workspace:select']({ path: '' })) as WorkspaceContext | null
+      const ws = (await window.api['workspace:select']({})) as WorkspaceContext | null
       if (ws) {
         const files = (await window.api['workspace:list-dir']({ dirPath: '.' })) as string[]
         set({ workspace: ws, files, isLoading: false })
