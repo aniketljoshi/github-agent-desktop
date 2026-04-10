@@ -16,13 +16,14 @@ import { SettingsPanel } from './features/settings/SettingsPanel'
 import { useSessionStore } from './store/session'
 
 export default function App() {
-  const { isAuthenticated, isLoading, checkStatus } = useAuthStore()
+  const { isAuthenticated, isLoading, checkStatus, bindDesktopAuthEvents } = useAuthStore()
   const { sidebarOpen, inspectorOpen, bottomPanelOpen, settingsOpen } = useUIStore()
   const { mode, pendingPermission } = useSessionStore()
 
   useEffect(() => {
+    bindDesktopAuthEvents()
     checkStatus()
-  }, [checkStatus])
+  }, [bindDesktopAuthEvents, checkStatus])
 
   if (isLoading) {
     return (
