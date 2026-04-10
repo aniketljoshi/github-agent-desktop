@@ -60,11 +60,11 @@ It is **unofficial** and **community-driven**. Not affiliated with GitHub or Mic
 
 ### Three Modes, One Workflow
 
-| Mode | What It Does | Powered By |
-|------|-------------|------------|
-| **Ask** | Multi-turn chat with any GitHub Models model. Attach workspace files as context. Stream responses in real time. | GitHub Models API |
-| **Plan** | Describe what you want. Get a structured plan with steps, affected files, and risk levels. Review before anything happens. | GitHub Models API |
-| **Agent** | Execute the plan. The agent reads files, writes code, runs shell commands — each action requires your explicit approval. | Copilot SDK |
+| Mode      | What It Does                                                                                                               | Powered By        |
+| --------- | -------------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| **Ask**   | Multi-turn chat with any GitHub Models model. Attach workspace files as context. Stream responses in real time.            | GitHub Models API |
+| **Plan**  | Describe what you want. Get a structured plan with steps, affected files, and risk levels. Review before anything happens. | GitHub Models API |
+| **Agent** | Execute the plan. The agent reads files, writes code, runs shell commands — each action requires your explicit approval.   | Copilot SDK       |
 
 ### Security-First Agent
 
@@ -79,11 +79,11 @@ Every agent action passes through a permission gate:
 
 Shell commands are classified by a risk engine before they reach you:
 
-| Classification | Examples | Behavior |
-|---------------|----------|----------|
-| **Safe** | `ls`, `git status`, `cat`, `pwd` | Auto-approved |
-| **Review** | `npm install`, `node script.js` | Show for approval |
-| **Dangerous** | `rm -rf`, `sudo`, `curl \| bash` | Blocked + warning |
+| Classification | Examples                         | Behavior          |
+| -------------- | -------------------------------- | ----------------- |
+| **Safe**       | `ls`, `git status`, `cat`, `pwd` | Auto-approved     |
+| **Review**     | `npm install`, `node script.js`  | Show for approval |
+| **Dangerous**  | `rm -rf`, `sudo`, `curl \| bash` | Blocked + warning |
 
 ### BYOK Status
 
@@ -92,7 +92,7 @@ provider routing and model selection are fully wired.
 
 ### Additional Highlights
 
-- **GitHub browser sign-in + Device Flow + PAT** — three auth paths, all encrypting tokens via the OS keychain
+- **GitHub browser sign-in + Device Flow + PAT** — local loopback auth for development, backend auth-service support for production-style sign-in, and secure token storage via the OS keychain
 - **Model picker** — browse the full GitHub Models catalog, grouped by publisher, with capability badges
 - **Monaco diff viewer** — review every proposed file change in a real code editor
 - **Integrated terminal** — xterm.js panel for command output and interaction
@@ -120,21 +120,66 @@ cd github-agent-desktop
 # Install dependencies
 pnpm install
 
-# Configure
+# Configure local loopback auth
 cp .env.example .env
-# Edit .env — add your GitHub OAuth App client_id
+# Edit .env — add your GitHub OAuth App credentials for local development
 
 # Start dev mode (hot-reload)
 pnpm dev
 ```
 
+### Local Development Auth
+
+For development, the desktop app can still use a loopback GitHub OAuth App directly:
+
+```env
+GITHUB_CLIENT_ID=...
+GITHUB_CLIENT_SECRET=...
+GITHUB_CALLBACK_URL=http://127.0.0.1:48163/callback
+```
+
+This is the fastest setup for local work, but it is not the recommended production distribution model because the desktop app is a public client.
+
+### Production-Style Auth
+
+This repo now also includes a small backend auth service under [`auth-service/`](auth-service) for hosted OAuth exchange.
+
+Use that path when you want:
+
+- desktop installs that do not require users to edit `.env`
+- the GitHub client secret to stay on the server
+- a browser login flow that redirects back into the desktop app through a custom protocol
+
+Minimal setup:
+
+```bash
+# Terminal 1 — desktop app
+pnpm dev
+
+# Terminal 2 — auth service
+pnpm auth:service:typecheck
+pnpm auth:service:build
+pnpm auth:service:start
+```
+
+Then configure the desktop app with:
+
+```env
+GITHUB_AUTH_SERVICE_URL=http://localhost:3001
+DESKTOP_AUTH_CALLBACK_URL=github-agent://auth/callback
+```
+
+See [`docs/auth-architecture.md`](docs/auth-architecture.md) for the full hosted flow.
+
 ### First Launch
 
-1. Click **Continue with GitHub** (opens your browser and shows a device code in-app)
-2. Pick a model from the catalog
-3. Start with **Ask** mode — type a question
-4. Switch to **Plan** to generate a structured plan
-5. Hit **Send to Agent** to execute it
+1. Click **Continue with GitHub**
+2. Your browser opens for sign-in
+3. After approval, the desktop app stores your token securely and restores focus
+4. Pick a model from the catalog
+5. Start with **Ask** mode — type a question
+6. Switch to **Plan** to generate a structured plan
+7. Hit **Send to Agent** to execute it
 
 ### Build for Distribution
 
@@ -167,8 +212,8 @@ Describe an objective. The model returns a structured JSON plan:
   "goal": "Add JWT authentication to the Express API",
   "assumptions": ["Express 4.x", "PostgreSQL for user storage"],
   "steps": [
-    { "title": "Install dependencies",   "files": ["package.json"], "risk": "low" },
-    { "title": "Create auth middleware",  "files": ["src/middleware/auth.ts"], "risk": "low" },
+    { "title": "Install dependencies", "files": ["package.json"], "risk": "low" },
+    { "title": "Create auth middleware", "files": ["src/middleware/auth.ts"], "risk": "low" },
     { "title": "Add login/register routes", "files": ["src/routes/auth.ts"], "risk": "medium" },
     { "title": "Protect existing routes", "files": ["src/routes/api.ts"], "risk": "low" }
   ]
@@ -200,15 +245,20 @@ You stay in control. Nothing writes to disk or runs a command without your say.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                       Electron Main Process                  │
-│                                                              │
+│                       Electron Main Process                 │
+│                                                             │
 │  ┌──────────┐  ┌──────────────┐  ┌────────────────────────┐ │
-│  │   Auth    │  │ GitHub Models│  │    Copilot SDK         │ │
-│  │          │  │   API        │  │    (adapter.ts only)    │ │
+│  │   Auth   │  │ GitHub Models│  │    Copilot SDK         │ │
+│  │          │  │   API        │  │    (adapter.ts only)   │ │
 │  │ • OAuth  │  │ • Catalog    │  │ • Session management   │ │
 │  │ • Device │  │ • Inference  │  │ • Permission handling  │ │
 │  │ • PAT    │  │ • Streaming  │  │ • Tool execution       │ │
 │  └──────────┘  └──────────────┘  └────────────────────────┘ │
+│  ┌──────────────────────── auth-service ───────────────────┐ │
+│  │ • GitHub OAuth callback                                 │ │
+│  │ • Code → token exchange                                 │ │
+│  │ • One-time desktop grant issuance                       │ │
+│  └─────────────────────────────────────────────────────────┘ │
 │                                                              │
 │  ┌──────────┐  ┌──────────────┐  ┌────────────────────────┐ │
 │  │Workspace │  │    Shell     │  │      Services          │ │
@@ -239,18 +289,26 @@ You stay in control. Nothing writes to disk or runs a command without your say.
 
 ### Key Design Decisions
 
-| Decision | Rationale |
-|----------|-----------|
-| **Single SDK import file** | `adapter.ts` is the only file that touches `@github/copilot-sdk`. If the SDK breaks, you update one file. |
-| **Zod on every IPC boundary** | The renderer is untrusted. Every `ipcMain.handle` validates input with a Zod schema before processing. |
-| **safeStorage for tokens** | Tokens are encrypted via the OS keychain (Windows Credential Manager / macOS Keychain / libsecret). Never stored as plaintext. |
-| **Path traversal guard** | Every file operation is checked against the workspace root + `path.sep`. No `../` escape possible. |
-| **Risk classifier for shell** | Shell commands pass through regex-based classification before reaching the user. Dangerous patterns are blocked by default. |
-| **contextIsolation + no nodeIntegration** | The renderer has zero access to Node.js APIs. Everything goes through the typed preload bridge. |
+| Decision                                  | Rationale                                                                                                                      |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| **Single SDK import file**                | `adapter.ts` is the only file that touches `@github/copilot-sdk`. If the SDK breaks, you update one file.                      |
+| **Zod on every IPC boundary**             | The renderer is untrusted. Every `ipcMain.handle` validates input with a Zod schema before processing.                         |
+| **safeStorage for tokens**                | Tokens are encrypted via the OS keychain (Windows Credential Manager / macOS Keychain / libsecret). Never stored as plaintext. |
+| **Path traversal guard**                  | Every file operation is checked against the workspace root + `path.sep`. No `../` escape possible.                             |
+| **Risk classifier for shell**             | Shell commands pass through regex-based classification before reaching the user. Dangerous patterns are blocked by default.    |
+| **contextIsolation + no nodeIntegration** | The renderer has zero access to Node.js APIs. Everything goes through the typed preload bridge.                                |
 
 ### Project Structure
 
 ```
+auth-service/               # Optional hosted OAuth exchange service
+├── src/
+│   ├── config.ts           # Env validation
+│   ├── server.ts           # /start, /callback, /exchange
+│   ├── services/           # GitHub OAuth, state, grants
+│   └── lib/pkce.ts         # PKCE helpers
+docs/
+├── auth-architecture.md    # Production auth flow and protocol design
 src/
 ├── shared/                  # Shared between main + renderer
 │   ├── types.ts             # All domain types
@@ -284,43 +342,46 @@ src/
 
 ## Scripts
 
-| Command | Purpose |
-|---------|---------|
-| `pnpm dev` | Start in development mode with hot reload |
-| `pnpm build` | Production build (main + preload + renderer) |
-| `pnpm test` | Run unit tests (Vitest) |
-| `pnpm test:coverage` | Unit tests with V8 coverage report |
-| `pnpm test:e2e` | Run E2E tests (Playwright + Electron) |
-| `pnpm typecheck` | TypeScript type checking (both tsconfigs) |
-| `pnpm lint` | ESLint check |
-| `pnpm format` | Prettier format all source files |
-| `pnpm build:win` | Build Windows distributables (.exe) |
-| `pnpm build:mac` | Build macOS distributables (.dmg) |
-| `pnpm build:linux` | Build Linux distributables (.AppImage, .deb) |
+| Command                       | Purpose                                      |
+| ----------------------------- | -------------------------------------------- |
+| `pnpm dev`                    | Start in development mode with hot reload    |
+| `pnpm build`                  | Production build (main + preload + renderer) |
+| `pnpm auth:service:typecheck` | Type-check the backend auth service          |
+| `pnpm auth:service:build`     | Compile the backend auth service             |
+| `pnpm auth:service:start`     | Start the backend auth service               |
+| `pnpm test`                   | Run unit tests (Vitest)                      |
+| `pnpm test:coverage`          | Unit tests with V8 coverage report           |
+| `pnpm test:e2e`               | Run E2E tests (Playwright + Electron)        |
+| `pnpm typecheck`              | TypeScript type checking (both tsconfigs)    |
+| `pnpm lint`                   | ESLint check                                 |
+| `pnpm format`                 | Prettier format all source files             |
+| `pnpm build:win`              | Build Windows distributables (.exe)          |
+| `pnpm build:mac`              | Build macOS distributables (.dmg)            |
+| `pnpm build:linux`            | Build Linux distributables (.AppImage, .deb) |
 
 ---
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Desktop shell | Electron 34 |
-| UI framework | React 19 |
-| Language | TypeScript 5.9 (strict) |
-| Build | electron-vite 5 (Vite 7 under the hood) |
-| Styling | Tailwind CSS 4 with oklch design tokens |
-| State | Zustand 5 |
-| AI (Ask/Plan) | GitHub Models API (streaming SSE) |
-| AI (Agent) | @github/copilot-sdk 0.2.x |
-| Code viewer | Monaco Editor |
-| Terminal | xterm.js |
-| Animation | Framer Motion 12 |
-| Markdown | react-markdown + remark-gfm + rehype-highlight |
-| Icons | Lucide React |
-| IPC validation | Zod 3.25 |
-| Tests | Vitest 3 + Playwright |
-| Packaging | electron-builder |
-| CI/CD | GitHub Actions |
+| Layer          | Technology                                     |
+| -------------- | ---------------------------------------------- |
+| Desktop shell  | Electron 34                                    |
+| UI framework   | React 19                                       |
+| Language       | TypeScript 5.9 (strict)                        |
+| Build          | electron-vite 5 (Vite 7 under the hood)        |
+| Styling        | Tailwind CSS 4 with oklch design tokens        |
+| State          | Zustand 5                                      |
+| AI (Ask/Plan)  | GitHub Models API (streaming SSE)              |
+| AI (Agent)     | @github/copilot-sdk 0.2.x                      |
+| Code viewer    | Monaco Editor                                  |
+| Terminal       | xterm.js                                       |
+| Animation      | Framer Motion 12                               |
+| Markdown       | react-markdown + remark-gfm + rehype-highlight |
+| Icons          | Lucide React                                   |
+| IPC validation | Zod 3.25                                       |
+| Tests          | Vitest 3 + Playwright                          |
+| Packaging      | electron-builder                               |
+| CI/CD          | GitHub Actions                                 |
 
 ---
 
@@ -328,15 +389,15 @@ src/
 
 This app runs an AI agent that can read files, write code, and execute shell commands on your machine. Security is not optional.
 
-| Boundary | Protection |
-|----------|-----------|
-| **Renderer ↔ Main** | `contextIsolation: true`, `nodeIntegration: false`. Every IPC input Zod-validated. |
-| **File system** | Path traversal guard rejects any access outside workspace root. |
-| **Shell execution** | Risk classifier categorizes every command. Dangerous commands blocked. All require approval. |
-| **Token storage** | OS-level encryption via Electron `safeStorage` (Credential Manager / Keychain / libsecret). |
-| **Permissions** | Every agent tool invocation surfaces in the UI. Write and shell ops require explicit user approval. |
-| **CSP** | Content Security Policy headers on the renderer. No `eval()`, no `innerHTML`. |
-| **Dependencies** | Copilot SDK is in `optionalDependencies` — the app works without it (Ask/Plan still function). |
+| Boundary            | Protection                                                                                          |
+| ------------------- | --------------------------------------------------------------------------------------------------- |
+| **Renderer ↔ Main** | `contextIsolation: true`, `nodeIntegration: false`. Every IPC input Zod-validated.                  |
+| **File system**     | Path traversal guard rejects any access outside workspace root.                                     |
+| **Shell execution** | Risk classifier categorizes every command. Dangerous commands blocked. All require approval.        |
+| **Token storage**   | OS-level encryption via Electron `safeStorage` (Credential Manager / Keychain / libsecret).         |
+| **Permissions**     | Every agent tool invocation surfaces in the UI. Write and shell ops require explicit user approval. |
+| **CSP**             | Content Security Policy headers on the renderer. No `eval()`, no `innerHTML`.                       |
+| **Dependencies**    | Copilot SDK is in `optionalDependencies` — the app works without it (Ask/Plan still function).      |
 
 Found a vulnerability? See [SECURITY.md](SECURITY.md) for responsible disclosure.
 

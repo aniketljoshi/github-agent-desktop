@@ -31,6 +31,7 @@ import {
   SETTINGS_CLEAR_BYOK
 } from '../shared/events'
 import * as authService from './auth/github-oauth'
+import { getDesktopAuthConfig, startDesktopAuthFlow } from './auth/auth-service-client'
 import { fetchGitHubUser, validatePAT } from './auth/pat-auth'
 import {
   deleteToken,
@@ -76,6 +77,12 @@ export function registerAllHandlers(): void {
   ipcMain.handle(
     AUTH_LOGIN_OAUTH,
     validated(ipcSchemas['auth:login-oauth'], async () => {
+      const desktopAuthConfig = getDesktopAuthConfig()
+      if (desktopAuthConfig) {
+        await startDesktopAuthFlow(desktopAuthConfig)
+        return { success: true, pending: true, authMethod: 'oauth' as const }
+      }
+
       const { clientId, clientSecret, callbackUrl } = getGitHubOAuthConfig()
       const token = await authService.startOAuthFlow(clientId, clientSecret, callbackUrl)
       focusMainWindow()

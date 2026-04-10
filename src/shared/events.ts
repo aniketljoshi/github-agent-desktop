@@ -12,6 +12,8 @@ export const AUTH_LOGIN_PAT = 'auth:login-pat' as const
 export const AUTH_LOGOUT = 'auth:logout' as const
 export const AUTH_STATUS = 'auth:status' as const
 export const AUTH_DEVICE_CODE = 'auth:device-code' as const
+export const AUTH_COMPLETED = 'auth:completed' as const
+export const AUTH_ERROR = 'auth:error' as const
 
 // ─── Models ─────────────────────────────────────────────────
 export const MODELS_CATALOG = 'models:catalog' as const
@@ -94,7 +96,9 @@ export const PUSH_CHANNELS = [
   AGENT_EVENT,
   AGENT_PERMISSION_REQUEST,
   TERMINAL_OUTPUT,
-  AUTH_DEVICE_CODE
+  AUTH_DEVICE_CODE,
+  AUTH_COMPLETED,
+  AUTH_ERROR
 ] as const
 
 export type InvokeChannel = (typeof INVOKE_CHANNELS)[number]

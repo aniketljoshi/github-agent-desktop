@@ -3,7 +3,7 @@ import { Github, KeyRound, Smartphone, Loader2, AlertCircle } from 'lucide-react
 import { useAuthStore } from '../../store/auth'
 
 export function LoginScreen() {
-  const { loginOAuth, loginDevice, loginPAT, isLoading, error } = useAuthStore()
+  const { loginOAuth, loginDevice, loginPAT, authPending, error } = useAuthStore()
   const [showPAT, setShowPAT] = useState(false)
   const [patInput, setPATInput] = useState('')
   const [deviceCode, setDeviceCode] = useState<{ code: string; uri: string } | null>(null)
@@ -100,14 +100,14 @@ export function LoginScreen() {
           <div className="auth-actions">
             <button
               onClick={loginOAuth}
-              disabled={isLoading}
+              disabled={authPending}
               className="auth-action auth-action--primary"
             >
-              {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Github size={16} />}
+              {authPending ? <Loader2 size={16} className="animate-spin" /> : <Github size={16} />}
               <span>Continue with GitHub</span>
             </button>
 
-            <button onClick={loginDevice} disabled={isLoading} className="auth-action">
+            <button onClick={loginDevice} disabled={authPending} className="auth-action">
               <Smartphone size={16} />
               <span>Use Device Code</span>
             </button>
@@ -150,10 +150,10 @@ export function LoginScreen() {
                 />
                 <button
                   onClick={() => void handlePAT()}
-                  disabled={isLoading || !patInput.trim()}
+                  disabled={authPending || !patInput.trim()}
                   className="auth-action auth-action--secondary"
                 >
-                  {isLoading ? 'Validating...' : 'Authenticate'}
+                  {authPending ? 'Validating...' : 'Authenticate'}
                 </button>
               </div>
             )}
@@ -161,7 +161,8 @@ export function LoginScreen() {
 
           <div className="auth-footnote">
             For local browser login, configure <code>GITHUB_CLIENT_ID</code>,{' '}
-            <code>GITHUB_CLIENT_SECRET</code>, and a matching <code>GITHUB_CALLBACK_URL</code>.
+            <code>GITHUB_CLIENT_SECRET</code>, and <code>GITHUB_CALLBACK_URL</code>. For
+            production-style auth, point the app at <code>GITHUB_AUTH_SERVICE_URL</code>.
           </div>
         </section>
       </div>
