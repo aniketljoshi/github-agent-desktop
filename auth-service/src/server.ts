@@ -1,7 +1,12 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http'
 import { URL } from 'node:url'
 import type { AuthServiceConfig } from './config.js'
-import { generateCodeChallenge, generateCodeVerifier, generateGrantToken, generateStateToken } from './lib/pkce.js'
+import {
+  generateCodeChallenge,
+  generateCodeVerifier,
+  generateGrantToken,
+  generateStateToken
+} from './lib/pkce.js'
 import {
   createGitHubAuthorizeUrl,
   exchangeOAuthCode,
@@ -31,14 +36,7 @@ export function createAuthService(dependencies: AuthServiceDependencies): {
 
   const server = createServer(async (request, response) => {
     try {
-      await routeRequest(
-        request,
-        response,
-        dependencies.config,
-        fetchImpl,
-        stateStore,
-        grantStore
-      )
+      await routeRequest(request, response, dependencies.config, fetchImpl, stateStore, grantStore)
     } catch (error) {
       sendJson(response, 500, {
         error: error instanceof Error ? error.message : 'Unexpected auth service error'

@@ -22,8 +22,7 @@ export function getDesktopAuthConfig(
 
   return {
     serviceUrl: serviceUrl.replace(/\/+$/, ''),
-    desktopCallbackUrl:
-      env.DESKTOP_AUTH_CALLBACK_URL?.trim() ?? 'github-agent://auth/callback'
+    desktopCallbackUrl: env.DESKTOP_AUTH_CALLBACK_URL?.trim() ?? 'github-agent://auth/callback'
   }
 }
 
@@ -67,10 +66,7 @@ export function extractProtocolCallbackFromArgv(
   return argv.find((value) => value.startsWith(expectedProtocol)) ?? null
 }
 
-export function isDesktopAuthCallbackUrl(
-  value: string,
-  desktopCallbackUrl: string
-): boolean {
+export function isDesktopAuthCallbackUrl(value: string, desktopCallbackUrl: string): boolean {
   const received = new URL(value)
   const expected = new URL(desktopCallbackUrl)
 

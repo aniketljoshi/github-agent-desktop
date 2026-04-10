@@ -31,10 +31,7 @@ import {
   SETTINGS_CLEAR_BYOK
 } from '../shared/events'
 import * as authService from './auth/github-oauth'
-import {
-  getDesktopAuthConfig,
-  startDesktopAuthFlow
-} from './auth/auth-service-client'
+import { getDesktopAuthConfig, startDesktopAuthFlow } from './auth/auth-service-client'
 import { fetchGitHubUser, validatePAT } from './auth/pat-auth'
 import {
   deleteToken,

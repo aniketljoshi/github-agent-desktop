@@ -1,7 +1,10 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-export function applyAuthServiceEnvFiles(baseDir: string, env: NodeJS.ProcessEnv = process.env): void {
+export function applyAuthServiceEnvFiles(
+  baseDir: string,
+  env: NodeJS.ProcessEnv = process.env
+): void {
   for (const filename of ['.env', '.env.local']) {
     const filePath = join(baseDir, filename)
     if (!existsSync(filePath)) {

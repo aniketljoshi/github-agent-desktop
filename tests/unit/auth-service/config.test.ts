@@ -32,11 +32,11 @@ describe('auth service config', () => {
   })
 
   it('throws for invalid callback URL or desktop protocol', () => {
-    expect(() =>
-      loadAuthServiceConfig({ ...baseEnv, GITHUB_CALLBACK_URL: 'not-a-url' })
-    ).toThrow('GITHUB_CALLBACK_URL must be a valid URL')
-    expect(() => loadAuthServiceConfig({ ...baseEnv, DESKTOP_PROTOCOL: 'https://example.com' })).toThrow(
-      'DESKTOP_PROTOCOL must be a custom desktop callback URL'
+    expect(() => loadAuthServiceConfig({ ...baseEnv, GITHUB_CALLBACK_URL: 'not-a-url' })).toThrow(
+      'GITHUB_CALLBACK_URL must be a valid URL'
     )
+    expect(() =>
+      loadAuthServiceConfig({ ...baseEnv, DESKTOP_PROTOCOL: 'https://example.com' })
+    ).toThrow('DESKTOP_PROTOCOL must be a custom desktop callback URL')
   })
 })

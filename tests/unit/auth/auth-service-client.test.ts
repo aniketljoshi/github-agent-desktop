@@ -31,9 +31,9 @@ describe('desktop auth service client', () => {
 
     expect(callback).toBe('github-agent://auth/callback?grant=abc123')
     expect(isDesktopAuthCallbackUrl(callback!, 'github-agent://auth/callback')).toBe(true)
-    expect(isDesktopAuthCallbackUrl('github-agent://other/path', 'github-agent://auth/callback')).toBe(
-      false
-    )
+    expect(
+      isDesktopAuthCallbackUrl('github-agent://other/path', 'github-agent://auth/callback')
+    ).toBe(false)
   })
 
   it('exchanges desktop grants through the backend', async () => {

@@ -39,7 +39,10 @@ if (!isTestEnvironment) {
     logStartup('second-instance event received')
     const authConfig = getDesktopAuthConfig()
     if (authConfig) {
-      const callbackUrl = extractProtocolCallbackFromArgv(commandLine, authConfig.desktopCallbackUrl)
+      const callbackUrl = extractProtocolCallbackFromArgv(
+        commandLine,
+        authConfig.desktopCallbackUrl
+      )
       if (callbackUrl) {
         pendingDesktopAuthUrl = callbackUrl
         void flushPendingDesktopAuth()
@@ -177,8 +180,7 @@ async function flushPendingDesktopAuth(): Promise<void> {
     })
     focusMainWindow()
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : 'Could not complete desktop sign-in'
+    const message = error instanceof Error ? error.message : 'Could not complete desktop sign-in'
     getMainWindow()?.webContents.send(AUTH_ERROR, message)
     focusMainWindow()
   }
