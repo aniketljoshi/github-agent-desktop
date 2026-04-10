@@ -54,7 +54,7 @@ export const agentDeleteSessionSchema = z.object({
 })
 
 export const workspaceSelectSchema = z.object({
-  path: z.string().min(1)
+  path: z.string().min(1).optional()
 })
 
 export const workspaceReadFileSchema = z.object({

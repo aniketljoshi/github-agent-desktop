@@ -38,7 +38,7 @@ export interface PreloadApi {
   'agent:list-sessions': () => Promise<AgentSessionSummary[]>
   'agent:delete-session': (args: { sessionId: string }) => Promise<void>
   'agent:permission-response': (args: { id: string; approved: boolean }) => Promise<void>
-  'workspace:select': (args: { path: string }) => Promise<WorkspaceContext | null>
+  'workspace:select': (args: { path?: string }) => Promise<WorkspaceContext | null>
   'workspace:info': () => Promise<WorkspaceContext | null>
   'workspace:read-file': (args: { filePath: string }) => Promise<string>
   'workspace:list-dir': (args: { dirPath: string }) => Promise<string[]>
